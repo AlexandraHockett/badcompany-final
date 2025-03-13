@@ -160,7 +160,7 @@ export default function Sobre() {
         <p className="text-gray-300">
           Tem alguma dúvida ou sugestão?{" "}
           <Link
-            href="/contacto"
+            href="../contactos"
             className="text-blue-300 hover:text-blue-200 underline"
           >
             Entre em contacto connosco

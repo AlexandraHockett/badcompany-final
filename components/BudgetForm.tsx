@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Button from "./Button";
 
@@ -17,12 +17,18 @@ type FormErrors = {
   [key in keyof FormData]?: string;
 };
 
-export default function BudgetForm() {
+interface BudgetFormProps {
+  selectedEventType?: string;
+}
+
+export default function BudgetForm({
+  selectedEventType = "",
+}: BudgetFormProps) {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     phone: "",
-    eventType: "",
+    eventType: selectedEventType, // Inicializa com o tipo selecionado
     date: "",
     guestCount: "",
     details: "",
@@ -31,6 +37,16 @@ export default function BudgetForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Atualiza o eventType quando selectedEventType muda
+  useEffect(() => {
+    if (selectedEventType) {
+      setFormData((prev) => ({
+        ...prev,
+        eventType: selectedEventType,
+      }));
+    }
+  }, [selectedEventType]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -94,23 +110,31 @@ export default function BudgetForm() {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  // Função simplificada de handleChange
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Limpa o erro do campo quando o usuário começa a digitar
     if (errors[name as keyof FormData]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name as keyof FormData]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name as keyof FormData]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -141,7 +165,7 @@ export default function BudgetForm() {
               name="name"
               placeholder="Nome completo"
               value={formData.name}
-              onChange={handleChange}
+              onChange={handleInputChange}
               className={`w-full p-2 rounded bg-gray-800 text-white border ${
                 errors.name ? "border-red-500" : "border-gray-700"
               }`}
@@ -159,7 +183,7 @@ export default function BudgetForm() {
               name="email"
               placeholder="Email para contato"
               value={formData.email}
-              onChange={handleChange}
+              onChange={handleInputChange}
               className={`w-full p-2 rounded bg-gray-800 text-white border ${
                 errors.email ? "border-red-500" : "border-gray-700"
               }`}
@@ -177,7 +201,7 @@ export default function BudgetForm() {
               name="phone"
               placeholder="Telefone (opcional)"
               value={formData.phone}
-              onChange={handleChange}
+              onChange={handleInputChange}
               className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
             />
           </div>
@@ -186,7 +210,7 @@ export default function BudgetForm() {
             <select
               name="eventType"
               value={formData.eventType}
-              onChange={handleChange}
+              onChange={handleSelectChange}
               className={`w-full p-2 rounded bg-gray-800 text-white border ${
                 errors.eventType ? "border-red-500" : "border-gray-700"
               }`}
@@ -219,7 +243,7 @@ export default function BudgetForm() {
                 name="date"
                 placeholder="Data do evento"
                 value={formData.date}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
               />
             </div>
@@ -230,7 +254,7 @@ export default function BudgetForm() {
                 name="guestCount"
                 placeholder="Nº de convidados"
                 value={formData.guestCount}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
               />
             </div>
@@ -241,7 +265,7 @@ export default function BudgetForm() {
               name="details"
               placeholder="Detalhes do evento (tema, estilo, preferências, etc.)"
               value={formData.details}
-              onChange={handleChange}
+              onChange={handleTextareaChange}
               rows={4}
               className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700"
             />
@@ -276,7 +300,7 @@ export default function BudgetForm() {
                   </svg>
                 ) : undefined
               }
-              containerClass="w-full max-w-xs" // Optional: control button width
+              containerClass="w-full max-w-xs"
             />
           </div>
           <p className="text-xs text-gray-400 text-center mt-4">

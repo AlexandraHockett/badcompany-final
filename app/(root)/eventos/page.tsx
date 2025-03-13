@@ -75,7 +75,7 @@ export default function EventosPage() {
         >
           <Button
             title="Organizar um evento?"
-            href="/contato"
+            href="/eventos/privados"
             rightIcon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"

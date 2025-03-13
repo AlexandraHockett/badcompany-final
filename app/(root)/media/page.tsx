@@ -62,31 +62,7 @@ export default function MediaPage() {
           ))}
         </motion.div>
 
-        <motion.div
-          className="w-full flex justify-center mt-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          <Button
-            title="Enviar conteúdo"
-            href="/contato"
-            rightIcon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            }
-          />
-        </motion.div>
+       
       </div>
     </section>
   );

@@ -13,6 +13,7 @@ import {
 export default function EventosPrivados() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(privateEventTypes[0].id);
+  const [selectedEventType, setSelectedEventType] = useState("");
 
   useEffect(() => {
     // Force normal scrolling behavior at the document level
@@ -28,6 +29,14 @@ export default function EventosPrivados() {
       document.body.style.overflow = "";
     };
   }, []);
+
+  // Função para rolar até o formulário de orçamento
+  const scrollToForm = (eventTypeId = "") => {
+    setSelectedEventType(eventTypeId);
+    document.getElementById("budget-form")?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -159,6 +168,7 @@ export default function EventosPrivados() {
                       </ul>
                       <Button
                         title="Orçamento Personalizado"
+                        onClick={() => scrollToForm(eventType.id)}
                         rightIcon={
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -190,11 +200,12 @@ export default function EventosPrivados() {
             variants={fadeInUp}
             custom={2}
             className="md:w-1/2"
+            id="budget-form"
           >
             <h2 className="text-2xl font-bold mb-6 text-center md:text-left">
               Solicita um Orçamento
             </h2>
-            <BudgetForm />
+            <BudgetForm selectedEventType={selectedEventType} />
           </motion.div>
 
           <motion.div
