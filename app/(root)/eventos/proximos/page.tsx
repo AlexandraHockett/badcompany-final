@@ -17,10 +17,28 @@ export default function ProximosEventos() {
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
   // Estado para controlar animações
   const [isLoaded, setIsLoaded] = useState(false);
+  // Estado para controlar se está no modo desktop ou não
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  // Ativar animações após carregamento
+  // Ativar animações após carregamento e verificar tamanho da tela
   useEffect(() => {
     setIsLoaded(true);
+
+    // Verificar tamanho da tela de forma segura (apenas no client-side)
+    const checkIfDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    // Verificar inicialmente
+    checkIfDesktop();
+
+    // Adicionar event listener para redimensionamento
+    window.addEventListener("resize", checkIfDesktop);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", checkIfDesktop);
+    };
   }, []);
 
   // Formatar data para exibição
@@ -181,10 +199,10 @@ export default function ProximosEventos() {
                     </div>
                   )}
 
-                  {/* Descrição (expandível no mobile) */}
+                  {/* Descrição (expandível no mobile) - AQUI ESTÁ A CORREÇÃO */}
                   <div
                     className={`text-gray-300 mb-6 overflow-hidden transition-all duration-300 ${
-                      activeEventId === event.id || window.innerWidth >= 768
+                      activeEventId === event.id || isDesktop
                         ? "max-h-96"
                         : "max-h-16 md:max-h-96"
                     }`}
