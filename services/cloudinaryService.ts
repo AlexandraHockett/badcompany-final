@@ -2,14 +2,12 @@
 import galleryData from "@/data/gallery";
 import { CloudinaryImage, CloudinaryAlbum } from "@/types/media";
 
+// Client-side: use NEXT_PUBLIC_ prefix
+// Server-side: we'll handle this differently
 const CLOUDINARY_CLOUD_NAME = process.env
   .NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME as string;
-const CLOUDINARY_API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY as string;
-// Note: In a real application, API secrets should be stored server-side only
-// We'll use the API key which is safe for client-side, and move sensitive operations server-side
 
 // Map of folder prefixes for each album
-// Adding Record<string, string> to provide an index signature
 const ALBUM_FOLDERS: Record<string, string> = {
   "2": "white-motion-24", // White Emotion 2024
   "3": "hula-hula-23", // Hula Hula 2023
@@ -48,35 +46,34 @@ export function getCloudinaryAlbumByPath(
   return cloudinaryAlbums.find((album) => album.folderPath === folderPath);
 }
 
-// Fetches images from Cloudinary using the API
+// Fetches images from Cloudinary using our server API endpoints
 export async function fetchCloudinaryImages(
   folderPath: string
 ): Promise<CloudinaryImage[]> {
   try {
-    // Get the folder prefix for this album
-    const folderPrefix = ALBUM_FOLDERS[folderPath];
-
-    if (!folderPrefix) {
-      console.error(`No folder prefix found for path: ${folderPath}`);
-      return [];
-    }
+    const albumId = folderPath;
 
     // Check if we've already cached this request
     if (imageCache[folderPath] && imageCache[folderPath].length > 0) {
       return imageCache[folderPath];
     }
 
-    // Build the API URL for searching resources
-    // Using the list endpoint which is available with API key only
-    const apiUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image`;
-    const params = new URLSearchParams({
-      prefix: folderPrefix,
-      max_results: "500",
-      type: "upload",
-      api_key: CLOUDINARY_API_KEY,
-    });
+    // Use our server API instead of direct Cloudinary API
+    let apiEndpoint = "";
 
-    const response = await fetch(`${apiUrl}?${params.toString()}`);
+    // Map to the correct API endpoint based on the folder
+    if (ALBUM_FOLDERS[folderPath] === "white-motion-24") {
+      apiEndpoint = "/api/gallery/white-emotion";
+    } else if (ALBUM_FOLDERS[folderPath] === "hula-hula-23") {
+      apiEndpoint = "/api/gallery/hula-hula";
+    } else {
+      throw new Error(
+        `No API endpoint configured for folder path: ${folderPath}`
+      );
+    }
+
+    // Call our server API
+    const response = await fetch(apiEndpoint);
 
     if (!response.ok) {
       throw new Error(`API request failed with status: ${response.status}`);
@@ -84,26 +81,13 @@ export async function fetchCloudinaryImages(
 
     const data = await response.json();
 
-    if (!data.resources || !Array.isArray(data.resources)) {
+    if (!data.images || !Array.isArray(data.images)) {
       console.error("Invalid API response structure:", data);
       return [];
     }
 
-    // Transform the API response into CloudinaryImage objects
-    const images: CloudinaryImage[] = data.resources.map(
-      (resource: any, index: number) => {
-        // Extract just the filename part from the public_id
-        const publicId = resource.public_id;
-
-        return {
-          id: index + 1,
-          title: `Foto ${index + 1}`,
-          url: resource.url,
-          date: resource.created_at || "",
-          identifier: publicId,
-        };
-      }
-    );
+    // Use the transformed images directly from our API
+    const images: CloudinaryImage[] = data.images;
 
     // Cache the results
     imageCache[folderPath] = images;

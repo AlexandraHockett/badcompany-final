@@ -117,10 +117,21 @@ export default function CloudinaryExplorer({
     setLoadError(false);
 
     try {
+      // Mapear o folderPath para a rota de API correta
+      let apiEndpoint = "";
+
+      // Use o mesmo mapeamento que definimos no cloudinaryService
+      if (folderPath === "2") {
+        apiEndpoint = "/api/gallery/white-emotion";
+      } else if (folderPath === "3") {
+        apiEndpoint = "/api/gallery/hula-hula";
+      } else {
+        // Fallback para a rota genérica se não houver mapeamento específico
+        apiEndpoint = `/api/cloudinary/${folderPath}`;
+      }
+
       // Fetch images from our API route with reduced batch size (100 instead of 500)
-      const response = await fetch(
-        `/api/cloudinary/${folderPath}?max_results=100`
-      );
+      const response = await fetch(`${apiEndpoint}?max_results=100`);
 
       if (!response.ok) {
         throw new Error(`API responded with status: ${response.status}`);
@@ -169,8 +180,21 @@ export default function CloudinaryExplorer({
     setLoading(true);
 
     try {
+      // Mapear o folderPath para a rota de API correta
+      let apiEndpoint = "";
+
+      // Use o mesmo mapeamento que definimos no cloudinaryService
+      if (folderPath === "2") {
+        apiEndpoint = "/api/gallery/white-emotion";
+      } else if (folderPath === "3") {
+        apiEndpoint = "/api/gallery/hula-hula";
+      } else {
+        // Fallback para a rota genérica se não houver mapeamento específico
+        apiEndpoint = `/api/cloudinary/${folderPath}`;
+      }
+
       const response = await fetch(
-        `/api/cloudinary/${folderPath}?max_results=100&next_cursor=${nextCursor}`
+        `${apiEndpoint}?max_results=100&next_cursor=${nextCursor}`
       );
 
       if (!response.ok) {

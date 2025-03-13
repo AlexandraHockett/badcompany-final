@@ -1,15 +1,17 @@
+// app/api/gallery/white-emotion/route.ts
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
-// Configure Cloudinary com as variáveis sem o prefixo NEXT_PUBLIC
+// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Folder name as seen in your Cloudinary account
-const FOLDER_NAME = "hula-hula-23";
+// Correct the folder name to match what's in your Cloudinary account
+const FOLDER_NAME = "whiteEmotion-24";
+const PUBLIC_ID_PREFIX = "white-motion-24";
 
 export async function GET(request: Request) {
   try {
@@ -18,17 +20,17 @@ export async function GET(request: Request) {
     const maxResults = parseInt(searchParams.get("max_results") || "500");
     const nextCursor = searchParams.get("next_cursor") || undefined;
 
-    // Tente usar a busca por pasta em vez do prefixo
+    // Use a search based on the public_id prefix instead of folder
     const result = await cloudinary.search
-      .expression(`folder:${FOLDER_NAME}`)
+      .expression(`public_id:${PUBLIC_ID_PREFIX}_*`)
       .sort_by("public_id", "asc")
       .max_results(maxResults)
       .next_cursor(nextCursor)
       .execute();
 
-    // Adicione logs para debugging
+    // Add debug log
     console.log(
-      `Cloudinary search for folder:${FOLDER_NAME} returned ${result.resources?.length || 0} images`
+      `Found ${result.resources?.length || 0} images for White Emotion`
     );
 
     // Transform results to include only necessary data
@@ -56,26 +58,10 @@ export async function GET(request: Request) {
       "Cloudinary API error:",
       error instanceof Error ? error.message : "Unknown error"
     );
-
-    // Log detalhado para debugging
-    if (error instanceof Error) {
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
-    }
-
     return NextResponse.json(
       {
         error: "Failed to fetch images from Cloudinary",
         message: error instanceof Error ? error.message : "Unknown error",
-        details:
-          process.env.NODE_ENV === "development"
-            ? error instanceof Error
-              ? error.stack
-              : "No stack trace"
-            : undefined,
       },
       { status: 500 }
     );
