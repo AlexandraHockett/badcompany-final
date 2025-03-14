@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const visitor = await prisma.visitor.upsert({
+    const _visitor = await prisma.visitor.upsert({
       where: { visitorId },
       update: {
         lastVisit: new Date(),
