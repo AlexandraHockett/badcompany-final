@@ -19,12 +19,12 @@ const links: SocialLink[] = [
     hoverColor: "hover:text-pink-500",
   },
   {
-    href: "https://www.facebook.com/badcompany",
+    href: "https://www.facebook.com/anyfa.badcompany/",
     icon: <FaFacebook size={24} />,
     hoverColor: "hover:text-blue-600",
   },
   {
-    href: "https://www.youtube.com/channel/badcompany",
+    href: "https://www.youtube.com/@KanalBADCOMPANY",
     icon: <FaYoutube size={24} />,
     hoverColor: "hover:text-red-600",
   },

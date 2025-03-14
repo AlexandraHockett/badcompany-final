@@ -110,13 +110,13 @@ export default function ContactosPage() {
     {
       name: "Facebook",
       icon: <FaFacebook />,
-      url: "https://www.facebook.com/badcompany",
+      url: "https://www.facebook.com/anyfa.badcompany/",
       color: "from-blue-600 to-blue-400",
     },
     {
       name: "YouTube",
       icon: <FaYoutube />,
-      url: "https://www.youtube.com/kanalbadcompany",
+      url: "https://www.youtube.com/@KanalBADCOMPANY",
       color: "from-red-600 to-red-400",
     },
   ];

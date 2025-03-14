@@ -183,13 +183,13 @@ const Contact: React.FC = () => {
                 icon: "📱",
                 name: "Facebook",
                 color: "blue",
-                url: "https://www.facebook.com/badcompany",
+                url: "https://www.facebook.com/anyfa.badcompany/",
               },
               {
                 icon: "🎬",
                 name: "YouTube",
                 color: "red",
-                url: "https://www.youtube.com/channel/badcompany",
+                url: "https://www.youtube.com/@KanalBADCOMPANY",
               },
             ].map((social, index) => (
               <motion.a
