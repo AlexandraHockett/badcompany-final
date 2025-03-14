@@ -8,12 +8,9 @@ datasource db {
 }
 
 model Visitor {
-  id         Int      @id @default(autoincrement())
-  visitorId  String   @unique
+  visitorId  String   @id // Mude de @unique para @id e remova o campo id
   userAgent  String?
   firstVisit DateTime @default(now())
   lastVisit  DateTime @default(now())
   visitCount Int      @default(1)
-
-  @@index([visitorId])
 }

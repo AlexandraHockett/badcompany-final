@@ -15,10 +15,7 @@ export async function POST(request: Request) {
 
     const _visitor = await prisma.visitor.upsert({
       where: { visitorId },
-      update: {
-        lastVisit: new Date(),
-        visitCount: { increment: 1 },
-      },
+      update: { lastVisit: new Date(), visitCount: { increment: 1 } },
       create: {
         visitorId,
         userAgent,
