@@ -16,34 +16,39 @@ export default function VisitorCounter({
   const [isError, setIsError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [glowPosition, setGlowPosition] = useState({ x: 0.5, y: 0.5 });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true); // Definir como montado no cliente
     // Set loaded after a small delay to trigger animations
     const timer = setTimeout(() => setIsLoaded(true), 500);
 
     // Check if this is a new visitor
     const checkVisitor = async () => {
       try {
-        const storedId = localStorage.getItem("badcompany_visitor_id");
-        if (!storedId) {
-          const newId =
-            "visitor_" +
-            Math.random().toString(36).substr(2, 9) +
-            "_" +
-            Date.now();
-          localStorage.setItem("badcompany_visitor_id", newId);
+        // Apenas executar no navegador, após montagem
+        if (typeof window !== "undefined") {
+          const storedId = localStorage.getItem("badcompany_visitor_id");
+          if (!storedId) {
+            const newId =
+              "visitor_" +
+              Math.random().toString(36).substr(2, 9) +
+              "_" +
+              Date.now();
+            localStorage.setItem("badcompany_visitor_id", newId);
 
-          // Register new visitor
-          await fetch("/api/visitors/increment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              visitorId: newId,
-              userAgent: navigator.userAgent,
-            }),
-          });
+            // Register new visitor
+            await fetch("/api/visitors/increment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                visitorId: newId,
+                userAgent: navigator.userAgent,
+              }),
+            });
+          }
         }
       } catch (error) {
         console.error("Erro ao registrar visita:", error);
@@ -74,17 +79,25 @@ export default function VisitorCounter({
 
     // Sequential execution to ensure visitor is registered before counts are fetched
     const initializeCounter = async () => {
-      await checkVisitor();
-      await fetchCounts();
+      if (mounted) {
+        // Apenas execute quando montado no cliente
+        await checkVisitor();
+        await fetchCounts();
+      }
     };
 
-    initializeCounter();
+    // Apenas executa depois da montagem
+    if (mounted) {
+      initializeCounter();
+    }
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [mounted]); // Adicionado mounted como dependência
 
   // Global mouse tracking for the glow effect
   useEffect(() => {
+    if (!mounted) return; // Não execute no lado do servidor
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
 
@@ -124,7 +137,7 @@ export default function VisitorCounter({
       window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(persistInterval);
     };
-  }, []);
+  }, [mounted]); // Adicionado mounted como dependência
 
   // Fallback values for demonstration if API is not working yet
   const displayVisitorCount = isError ? 1234 : visitorCount || 0;
@@ -177,7 +190,7 @@ export default function VisitorCounter({
               transition={{ duration: 0.8, delay: 0.6 }}
             />
           </h2>
-          <p className="text-gray-400 mt-3 text-sm sm:text-base">
+          <p className="text-gray-300 mt-3 text-sm sm:text-base">
             Experiência compartilhada pela nossa comunidade
           </p>
         </motion.div>
@@ -234,7 +247,7 @@ export default function VisitorCounter({
                     <div className="text-purple-400 mb-2">Visitas Totais</div>
                     <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
                       {visitorCount !== null ? (
-                        displayVisitorCount.toLocaleString("pt-BR")
+                        displayVisitorCount.toLocaleString("pt-PT")
                       ) : (
                         <motion.div
                           className="h-12 w-24 bg-gray-700/50 rounded-md"
@@ -302,7 +315,9 @@ export default function VisitorCounter({
                         />
                       </svg>
                       Última atualização:{" "}
-                      {new Date().toLocaleTimeString("pt-BR")}
+                      {mounted
+                        ? new Date().toLocaleTimeString("pt-PT")
+                        : "00:00:00"}
                     </div>
                   </div>
                 </div>
@@ -313,12 +328,12 @@ export default function VisitorCounter({
 
         {/* Bottom notes */}
         <motion.div
-          className="flex justify-center mt-6 text-sm text-gray-500"
+          className="flex justify-center mt-6 text-sm text-gray-600"
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <p>Conectando pessoas na BadCompany</p>
+          <p>Conectando pessoas na Má Vida</p>
         </motion.div>
       </div>
     </section>
