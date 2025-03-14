@@ -5,12 +5,13 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Mantemos mais simples para evitar erros
 }
 
 model Visitor {
-  visitorId  String   @id // Mude de @unique para @id e remova o campo id
-  userAgent  String?
-  firstVisit DateTime @default(now())
-  lastVisit  DateTime @default(now())
-  visitCount Int      @default(1)
+  visitorId   String   @id
+  userAgent   String
+  firstVisit  DateTime
+  lastVisit   DateTime
+  visitCount  Int      @default(1)
 }

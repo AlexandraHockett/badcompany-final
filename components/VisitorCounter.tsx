@@ -19,54 +19,58 @@ export default function VisitorCounter({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true); // Definir como montado no cliente
-    // Set loaded after a small delay to trigger animations
+    setMounted(true);
     const timer = setTimeout(() => setIsLoaded(true), 500);
 
-    // Check if this is a new visitor
-    const checkVisitor = async () => {
-      try {
-        // Apenas executar no navegador, após montagem
-        if (typeof window !== "undefined") {
-          const storedId = localStorage.getItem("badcompany_visitor_id");
-          if (!storedId) {
-            const newId =
-              "visitor_" +
-              Math.random().toString(36).substr(2, 9) +
-              "_" +
-              Date.now();
-            localStorage.setItem("badcompany_visitor_id", newId);
+    const getOrCreateVisitorId = () => {
+      // Verifica se já existe um ID de visitante no localStorage
+      let visitorId = localStorage.getItem("visitorId");
 
-            // Register new visitor
-            await fetch("/api/visitors/increment", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                visitorId: newId,
-                userAgent: navigator.userAgent,
-              }),
-            });
-          }
+      // Se não existir, cria um novo
+      if (!visitorId) {
+        visitorId =
+          "visitor_" +
+          Math.random().toString(36).substr(2, 9) +
+          "_" +
+          Date.now();
+        localStorage.setItem("visitorId", visitorId);
+      }
+
+      return visitorId;
+    };
+
+    const registerVisit = async () => {
+      try {
+        if (typeof window !== "undefined") {
+          // Obter ou criar ID único para este dispositivo
+          const visitorId = getOrCreateVisitorId();
+
+          await fetch("/api/visitors", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              visitorId: visitorId,
+              userAgent: navigator.userAgent,
+            }),
+          });
         }
       } catch (error) {
         console.error("Erro ao registrar visita:", error);
       }
     };
 
-    // Fetch visitor counts from API
     const fetchCounts = async () => {
       try {
-        // Get total visits
         const visitorsResponse = await fetch("/api/visitors/count");
+        const devicesResponse = await fetch("/api/visitors/devices");
+
         if (visitorsResponse.ok) {
           const visitorsData = await visitorsResponse.json();
           setVisitorCount(visitorsData.count);
         }
 
-        // Get unique devices
-        const devicesResponse = await fetch("/api/visitors/devices");
         if (devicesResponse.ok) {
           const devicesData = await devicesResponse.json();
           setDeviceCount(devicesData.count);
@@ -77,16 +81,13 @@ export default function VisitorCounter({
       }
     };
 
-    // Sequential execution to ensure visitor is registered before counts are fetched
     const initializeCounter = async () => {
       if (mounted) {
-        // Apenas execute quando montado no cliente
-        await checkVisitor();
+        await registerVisit();
         await fetchCounts();
       }
     };
 
-    // Apenas executa depois da montagem
     if (mounted) {
       initializeCounter();
     }
