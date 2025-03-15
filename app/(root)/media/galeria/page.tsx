@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  galleryCollections,
-  myAlbumCollection,
-} from "@/data/gallery";
+import { galleryCollections, myAlbumCollection } from "@/data/gallery";
 import { cloudinaryAlbums } from "@/services/cloudinaryService";
 
 interface ActiveCollectionImages {
@@ -24,6 +21,7 @@ export default function GaleriaPage() {
     myAlbumCollection.coverImages[0]
   );
 
+  // Initialize active collection images
   useEffect(() => {
     console.log("galleryCollections:", galleryCollections);
     if (!galleryCollections || galleryCollections.length === 0) return;
@@ -38,6 +36,7 @@ export default function GaleriaPage() {
     setActiveCollectionImages(initialState);
   }, []);
 
+  // Setup intervals for rotating collection images
   useEffect(() => {
     if (!galleryCollections || galleryCollections.length === 0) return;
     if (Object.keys(activeCollectionImages).length === 0) return;
@@ -51,8 +50,8 @@ export default function GaleriaPage() {
               const current = prev[collection.id];
               if (!current) return prev;
 
-              const nextIndex =
-                (current.index + 1) % collection.coverImages.length;
+              const coverImagesLength = collection.coverImages?.length || 0;
+              const nextIndex = (current.index + 1) % coverImagesLength;
               return {
                 ...prev,
                 [collection.id]: {
@@ -68,21 +67,24 @@ export default function GaleriaPage() {
     });
 
     return () => Object.values(intervals).forEach(clearInterval);
-  }, [galleryCollections, activeCollectionImages]);
+  }, [activeCollectionImages]);
 
+  // Setup interval for rotating main cover image
   useEffect(() => {
-    if (myAlbumCollection.coverImages.length <= 1) return;
+    // Store the length in a variable to avoid the dependency warning
+    const coverImagesLength = myAlbumCollection.coverImages.length;
+    if (coverImagesLength <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => {
-        const newIndex = (prevIndex + 1) % myAlbumCollection.coverImages.length;
+        const newIndex = (prevIndex + 1) % coverImagesLength;
         setCoverImage(myAlbumCollection.coverImages[newIndex]);
         return newIndex;
       });
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [myAlbumCollection.coverImages]);
+  }, []);
 
   return (
     <div className="text-white">
@@ -174,104 +176,3 @@ export default function GaleriaPage() {
     </div>
   );
 }
-//         Galeria de Fotos
-//       </h1>
-//       <p className="text-gray-400 text-center mb-10 max-w-3xl mx-auto">
-//         Explore as nossas coleções de fotos de alguns dos eventos da BadCompany.
-//       </p>
-
-//       <div className="mb-10 flex overflow-x-auto pb-2 scrollbar-hide">
-//         <div className="flex space-x-2 mx-auto">
-//           <Link
-//             href="/media/galeria"
-//             className="px-4 py-2 rounded-full bg-purple-600 text-white"
-//           >
-//             Coleções
-//           </Link>
-//           <Link
-//             href="/media/galeria/album"
-//             className="px-4 py-2 rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700"
-//           >
-//             Albuns
-//           </Link>
-//           <Link
-//             href="/media/galeria/fotos"
-//             className="px-4 py-2 rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700"
-//           >
-//             Fotos
-//           </Link>
-//         </div>
-//       </div>
-
-//       <motion.div
-//         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto"
-//         initial={{ opacity: 0 }}
-//         animate={{ opacity: 1 }}
-//         transition={{ duration: 0.5 }}
-//       >
-//         {[myAlbumCollection, ...cloudinaryAlbums].map((album) => (
-//           <motion.div
-//             key={album.id}
-//             initial={{ opacity: 0, y: 20 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.3 }}
-//             className="bg-gray-800/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-purple-500/20 transition-all duration-300 group"
-//           >
-//             <Link
-//               href={
-//                 "url" in album
-//                   ? album.url
-//                   : `/media/galeria/fotos/${"folderPath" in album ? album.folderPath : ""}`
-//               }
-//               className="block"
-//             >
-//               <div className="relative h-64 overflow-hidden">
-//                 <Image
-//                   src={album.coverImage}
-//                   alt={
-//                     "name" in album
-//                       ? album.name
-//                       : "title" in album
-//                         ? album.title
-//                         : "Imagem do álbum"
-//                   }
-//                   fill
-//                   className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
-//                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-//                   onError={(e) => {
-//                     const colors = [
-//                       "bg-blue-500",
-//                       "bg-green-500",
-//                       "bg-amber-500",
-//                       "bg-red-500",
-//                     ];
-//                     const target = e.currentTarget;
-//                     const container = target.parentElement;
-//                     if (container) {
-//                       container.classList.add(
-//                         colors[(album.id - 1) % colors.length]
-//                       );
-//                       target.style.display = "none";
-//                     }
-//                   }}
-//                 />
-//               </div>
-//               <div className="p-5">
-//                 <h2 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
-//                   {"name" in album
-//                     ? album.name
-//                     : "title" in album
-//                       ? album.title
-//                       : "Álbum sem nome"}
-//                 </h2>
-//                 <p className="text-gray-400 text-sm mb-4">
-//                   {album.description}
-//                 </p>
-//               </div>
-//             </Link>
-//           </motion.div>
-//         ))}
-//       </motion.div>
-//     </div>
-//   );
-// }

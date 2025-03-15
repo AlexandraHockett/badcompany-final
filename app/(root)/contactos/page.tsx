@@ -1,22 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaMapMarkerAlt,
   FaEnvelope,
   FaPhone,
-  FaInstagram,
-  FaFacebook,
-  FaYoutube,
   FaPaperPlane,
   FaRegCheckCircle,
-  FaLongArrowAltRight,
 } from "react-icons/fa";
-import Button from "@/components/Button"; // Adjust path as needed
+import Button from "@/components/Button";
+import { SiInstagram, SiFacebook, SiYoutube } from "react-icons/si";
+
+// Define proper types for form state
+interface FormState {
+  nome: string;
+  email: string;
+  mensagem: string;
+  [key: string]: string; // Index signature to allow string indexing
+}
 
 export default function ContactosPage() {
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<FormState>({
     nome: "",
     email: "",
     mensagem: "",
@@ -26,43 +31,33 @@ export default function ContactosPage() {
   const [animateIn, setAnimateIn] = useState(false);
 
   useEffect(() => {
-    // Start animation after component mounts
-    const timer = setTimeout(() => {
-      setAnimateIn(true);
-    }, 300);
-
+    const timer = setTimeout(() => setAnimateIn(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormState((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formState),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setSubmitSuccess(true);
         setFormState({ nome: "", email: "", mensagem: "" });
         setTimeout(() => setSubmitSuccess(false), 5000);
       } else {
         console.error("Erro ao enviar mensagem:", data.error);
-        // Opcional: mostrar mensagem de erro ao usuário
         alert(
           "Ocorreu um erro ao enviar a mensagem. Por favor, tente novamente."
         );
@@ -77,7 +72,6 @@ export default function ContactosPage() {
     }
   };
 
-  // Data for the page
   const title = "CONTACTOS";
   const contactInfo = [
     {
@@ -103,346 +97,353 @@ export default function ContactosPage() {
   const socialLinks = [
     {
       name: "Instagram",
-      icon: <FaInstagram />,
+      icon: <SiInstagram className="w-6 h-6 sm:w-7 sm:h-7" />,
       url: "https://www.instagram.com/badcompany_oficial",
-      color: "from-purple-600 to-pink-500",
+      color: "bg-gradient-to-br from-rose-500 via-fuchsia-500 to-indigo-500",
+      shadow: "rgba(225, 48, 108, 0.3)",
     },
     {
       name: "Facebook",
-      icon: <FaFacebook />,
+      icon: <SiFacebook className="w-6 h-6 sm:w-7 sm:h-7" />,
       url: "https://www.facebook.com/anyfa.badcompany/",
-      color: "from-blue-600 to-blue-400",
+      color: "bg-gradient-to-r from-blue-500 to-blue-600",
+      shadow: "rgba(24, 119, 242, 0.3)",
     },
     {
       name: "YouTube",
-      icon: <FaYoutube />,
+      icon: <SiYoutube className="w-6 h-6 sm:w-7 sm:h-7" />,
       url: "https://www.youtube.com/@KanalBADCOMPANY",
-      color: "from-red-600 to-red-400",
+      color: "bg-gradient-to-r from-red-500 to-red-600",
+      shadow: "rgba(255, 0, 0, 0.3)",
     },
   ];
 
-  // Background style
-  const backgroundStyle = {
-    backgroundImage:
-      "linear-gradient(to bottom right, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.1))",
-    backdropFilter: "blur(10px)",
-  };
-
   return (
-    <div className="py-6 sm:py-8 relative z-10">
-      {/* Background glowing elements */}
-      <div className="absolute top-0 right-0 opacity-20 blur-xl pointer-events-none">
-        <div
-          className="w-64 h-64 rounded-full bg-blue-600"
-          style={{ filter: "blur(60px)" }}
-        />
-      </div>
-      <div className="absolute bottom-0 left-0 opacity-20 blur-xl pointer-events-none">
-        <div
-          className="w-72 h-72 rounded-full bg-purple-600"
-          style={{ filter: "blur(70px)" }}
-        />
-      </div>
-
-      {/* Animated heading */}
-      <div className="mb-8 sm:mb-12 relative overflow-hidden">
-        <div className="flex justify-center">
-          {title.split("").map((letter, index) => (
-            <motion.span
-              key={index}
-              initial={{ y: 50, opacity: 0 }}
-              animate={animateIn ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-              transition={{
-                duration: 0.6,
-                delay: 0.1 + index * 0.05,
-                ease: [0.215, 0.61, 0.355, 1],
-              }}
-              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider inline-block mx-0.5 sm:mx-1"
-            >
-              {letter}
-            </motion.span>
-          ))}
-        </div>
+    <div className="py-12 sm:py-16 relative z-10 min-h-screen">
+      {/* Título da página */}
+      <div className="mb-12 sm:mb-16 relative text-center">
         <motion.div
-          initial={{ scaleX: 0 }}
-          animate={animateIn ? { scaleX: 1 } : { scaleX: 0 }}
-          transition={{
-            duration: 1,
-            delay: 0.8,
-            ease: [0.215, 0.61, 0.355, 1],
-          }}
-          className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 w-48 mx-auto mt-4"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
-        {/* Form Section */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={animateIn ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="bg-black/50 border border-white/10 rounded-xl p-5 sm:p-6 shadow-lg"
-          style={backgroundStyle}
+          className="relative inline-block"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={
+            animateIn ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }
+          }
+          transition={{ duration: 1, ease: "easeOut" }}
         >
-          <div className="flex items-center mb-5">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-              <FaPaperPlane className="text-white w-3 h-3" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white ml-3">
-              Fale Connosco
-            </h2>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="group">
-              <label
-                htmlFor="nome"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1"
-              >
-                Nome
-              </label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                value={formState.nome}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm bg-black/30 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
-                placeholder="O seu nome"
-              />
-            </div>
-
-            <div className="group">
-              <label
-                htmlFor="email"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formState.email}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm bg-black/30 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
-                placeholder="O seu email"
-              />
-            </div>
-
-            <div className="group">
-              <label
-                htmlFor="mensagem"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1"
-              >
-                Mensagem
-              </label>
-              <textarea
-                id="mensagem"
-                name="mensagem"
-                value={formState.mensagem}
-                onChange={handleChange}
-                required
-                rows={4}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm bg-black/30 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
-                placeholder="A sua mensagem"
-              />
-            </div>
-
-            <div className="pt-2">
-              {isSubmitting ? (
-                <div className="flex items-center justify-center py-2 sm:py-3 px-3 sm:px-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white">
-                  <svg
-                    className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white mr-2 sm:mr-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  <span className="text-sm sm:text-base font-medium">
-                    A processar...
-                  </span>
-                </div>
-              ) : (
-                <Button
-                  title="Enviar Mensagem"
-                  type="submit"
-                  disabled={isSubmitting}
-                  containerClass="w-full py-2 sm:py-3 text-sm sm:text-base transition-all duration-300 transform hover:translate-y-[-2px]"
-                />
-              )}
-            </div>
-
-            <AnimatePresence>
-              {submitSuccess && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="p-3 sm:p-4 bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-600/30 rounded-lg"
-                >
-                  <div className="flex items-center">
-                    <FaRegCheckCircle className="w-5 h-5 text-green-400 mr-2 flex-shrink-0" />
-                    <p className="text-green-200 text-sm">
-                      Mensagem enviada com sucesso! Entraremos em contacto
-                      brevemente.
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </form>
-        </motion.div>
-
-        {/* Info Section */}
-        <div className="space-y-6 sm:space-y-8">
-          {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={animateIn ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="bg-black/50 border border-white/10 rounded-xl p-5 sm:p-6 shadow-lg"
-            style={backgroundStyle}
+          <motion.h1
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-500 tracking-wide drop-shadow-[0_4px_12px_rgba(168,85,247,0.8)]"
+            initial={{ filter: "blur(10px)" }}
+            animate={
+              animateIn ? { filter: "blur(0px)" } : { filter: "blur(10px)" }
+            }
+            transition={{ duration: 1.5, delay: 0.5 }}
           >
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 flex items-center">
-              <span className="inline-block w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-500 mr-3"></span>
-              Informações de Contacto
-            </h3>
+            {title}
+          </motion.h1>
+          <motion.div
+            className="h-1 w-48 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 rounded-full mx-auto mt-4 shadow-[0_0_15px_rgba(168,85,247,0.6)]"
+            initial={{ scaleX: 0 }}
+            animate={animateIn ? { scaleX: 1 } : { scaleX: 0 }}
+            transition={{ duration: 1.2, delay: 1, ease: "easeOut" }}
+          />
+          <motion.p
+            className="mt-4 text-lg text-white font-medium drop-shadow-md"
+            initial={{ opacity: 0 }}
+            animate={animateIn ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 1, delay: 1.5 }}
+          >
+            Conecte-se com a Bad Company!
+          </motion.p>
+        </motion.div>
+      </div>
 
-            <ul className="space-y-4 sm:space-y-5">
-              {contactInfo.map((item, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
+      {/* Layout Principal */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Grid para Formulário e Informações (somente em md e acima) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+          {/* Seção do Formulário */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={animateIn ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+            transition={{ duration: 1, delay: 0.8 }}
+            className="backdrop-blur-xl bg-black/40 border border-purple-500/50 rounded-2xl p-5 sm:p-6 md:p-5 lg:p-6 shadow-[0_0_25px_rgba(168,85,247,0.3)] self-start"
+            whileHover={{
+              scale: 1.02,
+              boxShadow: "0 0 35px rgba(168, 85, 247, 0.5)",
+            }}
+          >
+            <div className="flex items-center mb-3 sm:mb-4">
+              <motion.div
+                className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(168,85,247,0.7)]"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.8 }}
+              >
+                <FaPaperPlane className="text-white w-4 h-4" />
+              </motion.div>
+              <h2 className="text-lg sm:text-xl font-bold text-white ml-2 sm:ml-3 drop-shadow-[0_2px_6px_rgba(255,255,255,0.5)]">
+                Fale Connosco
+              </h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+              {["nome", "email", "mensagem"].map((field, index) => (
+                <motion.div
+                  key={field}
+                  className="group relative"
+                  initial={{ opacity: 0, x: -20 }}
                   animate={
-                    animateIn ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }
+                    animateIn ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }
                   }
-                  transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
-                  className="group"
+                  transition={{ duration: 0.6, delay: 1 + index * 0.2 }}
                 >
-                  <a
-                    href={item.link}
-                    target={item.label === "Morada" ? "_blank" : undefined}
-                    rel={
-                      item.label === "Morada"
-                        ? "noopener noreferrer"
-                        : undefined
-                    }
-                    className="flex items-start group"
+                  <label
+                    htmlFor={field}
+                    className="block text-xs sm:text-sm font-medium text-gray-200 mb-1 sm:mb-2 drop-shadow-sm group-focus-within:text-purple-300 transition-all"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg flex items-center justify-center mr-3 group-hover:from-blue-600/50 group-hover:to-purple-600/50 transition-all duration-300">
-                      <div className="text-blue-400 group-hover:text-white transition-colors duration-300">
-                        {item.icon}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">{item.label}</p>
-                      <p className="text-white text-sm sm:text-base group-hover:text-blue-300 transition-colors duration-300 whitespace-pre-line">
-                        {item.value}
+                    {field}
+                  </label>
+                  {field === "mensagem" ? (
+                    <textarea
+                      id={field}
+                      name={field}
+                      value={formState[field]}
+                      onChange={handleChange}
+                      required
+                      rows={3}
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-black/60 border border-purple-500/70 rounded-lg focus:ring-2 focus:ring-purple-500/60 focus:border-purple-600 text-white placeholder-gray-500 text-sm sm:text-base transition-all duration-300 shadow-[inset_0_0_8px_rgba(168,85,247,0.2)]"
+                      placeholder={`Sua ${field}`}
+                    />
+                  ) : (
+                    <input
+                      type={field === "email" ? "email" : "text"}
+                      id={field}
+                      name={field}
+                      value={formState[field]}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-black/60 border border-purple-500/70 rounded-lg focus:ring-2 focus:ring-purple-500/60 focus:border-purple-600 text-white placeholder-gray-500 text-sm sm:text-base transition-all duration-300 shadow-[inset_0_0_8px_rgba(168,85,247,0.2)]"
+                      placeholder={`Seu ${field}`}
+                    />
+                  )}
+                </motion.div>
+              ))}
+
+              <motion.div
+                className="pt-2 sm:pt-4 flex justify-center"
+                initial={{ opacity: 0 }}
+                animate={animateIn ? { opacity: 1 } : { opacity: 0 }}
+                transition={{ duration: 0.8, delay: 1.6 }}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center py-2 sm:py-3 px-8 sm:px-10 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-lg text-white shadow-[0_0_15px_rgba(168,85,247,0.6)]">
+                    <svg
+                      className="animate-spin h-5 w-5 text-white mr-2 sm:mr-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    <span className="text-sm sm:text-base font-medium">
+                      Enviando...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="w-auto">
+                    <Button
+                      title="Enviar Mensagem"
+                      type="submit"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                )}
+              </motion.div>
+
+              <AnimatePresence>
+                {submitSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="p-2 sm:p-4 bg-gradient-to-r from-green-500/30 to-green-700/30 backdrop-blur-md border border-green-500/50 rounded-lg shadow-[0_0_10px_rgba(34,197,94,0.4)]"
+                  >
+                    <div className="flex items-center">
+                      <FaRegCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mr-2" />
+                      <p className="text-green-100 text-xs sm:text-sm font-medium drop-shadow-sm">
+                        Mensagem enviada! Responderemos em breve!
                       </p>
                     </div>
-                  </a>
-                </motion.li>
-              ))}
-            </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
           </motion.div>
 
-          {/* Social Media */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={animateIn ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="bg-black/50 border border-white/10 rounded-xl p-5 sm:p-6 shadow-lg"
-            style={backgroundStyle}
-          >
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-5 text-center">
-              Siga-nos nas Redes Sociais
-            </h3>
-
-            <div className="flex justify-center space-x-4 sm:space-x-6">
-              {socialLinks.map((social, index) => (
-                <motion.a
-                  key={index}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={
-                    animateIn
-                      ? { opacity: 1, scale: 1 }
-                      : { opacity: 0, scale: 0.8 }
-                  }
-                  transition={{
-                    duration: 0.6,
-                    delay: 1.0 + index * 0.15,
-                    type: "spring",
-                    stiffness: 200,
-                  }}
-                  whileHover={{ scale: 1.15, y: -5 }}
-                  className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${social.color} rounded-full flex items-center justify-center shadow-lg`}
-                  style={{
-                    boxShadow: `0 0 15px rgba(79, 70, 229, 0.3)`,
-                  }}
-                >
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 text-white">
-                    {social.icon}
-                  </div>
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Map */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={animateIn ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.8, delay: 1.0 }}
-            className="bg-black/50 border border-white/10 rounded-xl overflow-hidden shadow-lg"
-            style={backgroundStyle}
-          >
-            <div className="p-5 pb-3">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
-                Localização
+          {/* Seção de Informações (Contato + Redes Sociais) */}
+          <div className="space-y-6">
+            {/* Informações de Contato */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={animateIn ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 1, delay: 1 }}
+              className="backdrop-blur-xl bg-black/40 border border-purple-500/50 rounded-2xl p-5 sm:p-6 md:p-5 lg:p-6 shadow-[0_0_25px_rgba(168,85,247,0.3)]"
+              whileHover={{
+                scale: 1.02,
+                boxShadow: "0 0 35px rgba(168, 85, 247, 0.5)",
+              }}
+            >
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center drop-shadow-[0_2px_6px_rgba(255,255,255,0.5)]">
+                <span className="inline-block w-2 h-6 sm:h-8 bg-gradient-to-b from-purple-600 to-fuchsia-600 mr-2 sm:mr-3 rounded-full shadow-md" />
+                Informações de Contacto
               </h3>
-            </div>
+              <ul className="space-y-4 sm:space-y-5">
+                {contactInfo.map((item, index) => (
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={
+                      animateIn ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }
+                    }
+                    transition={{ duration: 0.8, delay: 1.2 + index * 0.2 }}
+                    className="group"
+                  >
+                    <a
+                      href={item.link}
+                      target={item.label === "Morada" ? "_blank" : undefined}
+                      rel={
+                        item.label === "Morada"
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
+                      className="flex items-center group"
+                    >
+                      <motion.div
+                        className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600/40 to-fuchsia-600/40 rounded-full flex items-center justify-center mr-3 sm:mr-4 group-hover:from-purple-600/60 group-hover:to-fuchsia-600/60 shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                        whileHover={{ scale: 1.1, rotate: 10 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <div className="text-purple-300 group-hover:text-white transition-colors duration-300 text-lg sm:text-xl">
+                          {item.icon}
+                        </div>
+                      </motion.div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-300 mb-1 group-hover:text-purple-300 transition-colors duration-300 drop-shadow-sm">
+                          {item.label}
+                        </p>
+                        <p className="text-sm sm:text-base text-white group-hover:text-purple-200 font-medium transition-colors duration-300 whitespace-pre-line drop-shadow-[0_1px_4px_rgba(255,255,255,0.3)]">
+                          {item.value}
+                        </p>
+                      </div>
+                    </a>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
 
-            <div className="h-52 sm:h-64 relative">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3109.492990379808!2d-9.262929684686598!3d38.75797347959149!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ecf4dc4cc10ed%3A0x2c4eb125bae35c2f!2sPraceta%20Major%20Aviador%20Humberto%20da%20Cruz%209%2C%202745-026%20Queluz!5e0!3m2!1spt-PT!2spt!4v1645724163125!5m2!1spt-PT!2spt"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen={false}
-                loading="lazy"
-                className="absolute inset-0"
-              />
-              <motion.a
-                href="https://maps.google.com/?q=Praceta+Major+Aviador+Humberto+da+Cruz+9,+2745-026+Queluz,+Portugal"
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.05 }}
-                className="absolute bottom-3 right-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center shadow-lg"
-              >
-                <FaMapMarkerAlt className="w-4 h-4 mr-2" />
-                Obter Direções
-              </motion.a>
-            </div>
-          </motion.div>
+            {/* Redes Sociais */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={animateIn ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 1, delay: 1.4 }}
+              className="backdrop-blur-xl bg-black/40 border border-purple-500/50 rounded-2xl p-5 sm:p-6 md:p-5 lg:p-6 shadow-[0_0_25px_rgba(168,85,247,0.3)]"
+              whileHover={{
+                scale: 1.02,
+                boxShadow: "0 0 35px rgba(168, 85, 247, 0.5)",
+              }}
+            >
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 text-center drop-shadow-[0_2px_6px_rgba(255,255,255,0.5)]">
+                Siga-nos nas Redes Sociais
+              </h3>
+              <div className="flex justify-center space-x-6 sm:space-x-8 md:space-x-10">
+                {socialLinks.map((social, index) => (
+                  <motion.a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={
+                      animateIn
+                        ? { opacity: 1, scale: 1 }
+                        : { opacity: 0, scale: 0 }
+                    }
+                    transition={{
+                      duration: 0.8,
+                      delay: 1.6 + index * 0.2,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    whileHover={{
+                      scale: 1.15,
+                      rotate: 5,
+                      boxShadow: `0 0 25px ${social.shadow}`,
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 ${social.color} rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-all duration-300`}
+                  >
+                    <div className="text-white drop-shadow-md">
+                      {social.icon}
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
+
+        {/* Mapa - Ocupa toda a largura em md e acima */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={animateIn ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 1, delay: 1.8 }}
+          className="backdrop-blur-xl bg-black/40 border border-purple-500/50 rounded-2xl overflow-hidden shadow-[0_0_25px_rgba(168,85,247,0.3)] mt-6 md:mt-0"
+          whileHover={{
+            scale: 1.02,
+            boxShadow: "0 0 35px rgba(168, 85, 247, 0.5)",
+          }}
+        >
+          <div className="p-5 sm:p-6 md:p-8 pb-4">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 flex items-center drop-shadow-[0_2px_6px_rgba(255,255,255,0.5)]">
+              <FaMapMarkerAlt className="text-purple-400 mr-2 sm:mr-3 text-xl sm:text-2xl" />
+              Localização
+            </h3>
+          </div>
+          <div className="h-80 md:h-[500px] lg:h-[600px] relative">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3109.492990379808!2d-9.262929684686598!3d38.75797347959149!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ecf4dc4cc10ed%3A0x2c4eb125bae35c2f!2sPraceta%20Major%20Aviador%20Humberto%20da%20Cruz%209%2C%202745-026%20Queluz!5e0!3m2!1spt-PT!2spt!4v1645724163125!5m2!1spt-PT!2spt"
+              width="100%"
+              height="100%"
+              style={{ border: 0, filter: "brightness(90%) contrast(110%)" }}
+              allowFullScreen={false}
+              loading="lazy"
+              className="absolute inset-0 rounded-b-2xl"
+            />
+            <motion.a
+              href="https://maps.google.com/?q=Praceta+Major+Aviador+Humberto+da+Cruz+9,+2745-026+Queluz,+Portugal"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{
+                scale: 1.1,
+                boxShadow: "0 0 20px rgba(168, 85, 247, 0.7)",
+              }}
+              className="absolute bottom-4 right-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex items-center shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+            >
+              <FaMapMarkerAlt className="w-4 h-4 mr-1 sm:mr-2" />
+              Obter Direções
+            </motion.a>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

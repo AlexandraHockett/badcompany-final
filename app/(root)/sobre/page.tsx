@@ -69,17 +69,19 @@ const SectionCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={section.path} className="block p-6">
+      <Link href={section.path} className="block p-6 pb-14">
         <div className="relative z-10 mb-4 text-4xl bg-gradient-to-br from-purple-300 to-blue-300 text-transparent bg-clip-text">
           {section.icon}
         </div>
         <h2 className="relative z-10 mb-3 text-2xl font-bold text-white">
           {section.title}
         </h2>
-        <p className="relative z-10 text-gray-200">{section.description}</p>
+        <p className="relative z-10 text-gray-200 mb-8">
+          {section.description}
+        </p>
 
         <motion.div
-          className="absolute bottom-4 right-4 mt-4 flex items-center text-blue-300"
+          className="absolute bottom-4 right-4 flex items-center text-blue-300 mt-6"
           animate={{ x: isHovered ? 0 : 5, opacity: isHovered ? 1 : 0.7 }}
           transition={{ duration: 0.3 }}
         >
@@ -112,7 +114,7 @@ const SectionCard = ({
 
 export default function Sobre() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 relative z-10">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-24 sm:mt-28 md:mt-32 py-12 sm:py-16 relative z-10">
       <div className="text-center mb-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}

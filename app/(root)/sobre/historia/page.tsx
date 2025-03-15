@@ -66,12 +66,14 @@ export default function Historia() {
     updateHeight();
 
     const resizeObserver = new ResizeObserver(updateHeight);
-    if (timelineRef.current) {
-      resizeObserver.observe(timelineRef.current);
+    const timelineElement = timelineRef.current;
+
+    if (timelineElement) {
+      resizeObserver.observe(timelineElement);
     }
 
     return () => {
-      if (timelineRef.current) {
+      if (timelineElement) {
         resizeObserver.disconnect();
       }
     };

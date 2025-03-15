@@ -1,53 +1,149 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
   buildCloudinaryUrl,
   type CloudinaryImage,
 } from "@/services/cloudinaryService";
 
-const IMAGES_PER_PAGE = 24;
+const IMAGES_PER_PAGE = 12;
 
-interface ImageCardProps {
-  url: string;
-  alt: string;
-  onClick: () => void;
-  index: number;
-}
+// Improved ImageCard with better error handling and optimization
+const ImageCard = memo(
+  ({
+    url,
+    alt,
+    onClick,
+    index,
+  }: {
+    url: string;
+    alt: string;
+    onClick: () => void;
+    index: number;
+  }) => {
+    const [imageError, setImageError] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
 
-const ImageCard = ({ url, alt, onClick, index }: ImageCardProps) => {
-  const [imageError, setImageError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+    // Pre-calculate animation delay to avoid runtime calculation
+    const animationDelay = Math.min(0.05 * (index % IMAGES_PER_PAGE), 0.6);
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{
-        opacity: isLoaded || imageError ? 1 : 0,
-        y: isLoaded || imageError ? 0 : 20,
-      }}
-      transition={{
-        duration: 0.3,
-        delay: Math.min(0.05 * (index % IMAGES_PER_PAGE), 1),
-      }}
-      className="relative aspect-square overflow-hidden bg-gray-800 rounded-lg cursor-pointer group"
-      onClick={onClick}
-    >
-      {!imageError ? (
-        <img
-          src={url}
-          alt={alt}
-          className={`w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105 ${isLoaded ? "opacity-100" : "opacity-0"}`}
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setImageError(true)}
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-700 p-4">
-          <div className="text-center">
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{
+          opacity: isLoaded || imageError ? 1 : 0,
+          y: isLoaded || imageError ? 0 : 20,
+        }}
+        transition={{
+          duration: 0.3,
+          delay: animationDelay,
+        }}
+        className="relative aspect-square overflow-hidden bg-gray-800 rounded-lg cursor-pointer group"
+        onClick={onClick}
+      >
+        {!imageError ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={url}
+              alt={alt}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              onLoadingComplete={() => setIsLoaded(true)}
+              onError={() => setImageError(true)}
+              unoptimized // For external Cloudinary images
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-700 p-4">
+            <div className="text-center">
+              <svg
+                className="w-12 h-12 mx-auto text-gray-500 mb-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <p className="text-gray-400 text-sm">Imagem indisponível</p>
+            </div>
+          </div>
+        )}
+        {isLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end">
+            <div className="p-4 w-full">
+              <p className="text-white text-sm font-medium truncate">{alt}</p>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    );
+  },
+  // Implement proper prop equality check for memo
+  (prevProps, nextProps) => {
+    return (
+      prevProps.url === nextProps.url && prevProps.index === nextProps.index
+    );
+  }
+);
+
+ImageCard.displayName = "ImageCard";
+
+// Optimized Pagination component with reduced re-renders
+const Pagination = memo(
+  ({
+    currentPage,
+    totalPages,
+    changePage,
+  }: {
+    currentPage: number;
+    totalPages: number;
+    changePage: (page: number) => void;
+  }) => {
+    if (totalPages <= 1) return null;
+
+    // Pre-calculate pagination array to avoid recreating it on each render
+    const paginationItems = useMemo(() => {
+      return Array.from({ length: totalPages }, (_, i) => i + 1)
+        .filter(
+          (page) =>
+            page === 1 ||
+            page === totalPages ||
+            (page >= currentPage - 1 && page <= currentPage + 1)
+        )
+        .map((page, index, array) => {
+          const showEllipsisBefore = index > 0 && array[index - 1] !== page - 1;
+          const showEllipsisAfter =
+            index < array.length - 1 && array[index + 1] !== page + 1;
+
+          return { page, showEllipsisBefore, showEllipsisAfter };
+        });
+    }, [currentPage, totalPages]);
+
+    return (
+      <div className="mt-10 flex justify-center">
+        <nav className="flex items-center">
+          <button
+            onClick={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`mx-1 p-2 rounded-full ${
+              currentPage === 1
+                ? "text-gray-500 cursor-not-allowed"
+                : "text-white hover:bg-gray-700"
+            }`}
+            aria-label="Página anterior"
+          >
             <svg
-              className="w-12 h-12 mx-auto text-gray-500 mb-2"
+              className="w-5 h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -55,24 +151,213 @@ const ImageCard = ({ url, alt, onClick, index }: ImageCardProps) => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
               />
             </svg>
-            <p className="text-gray-400 text-sm">Imagem indisponível</p>
+          </button>
+          <div className="flex">
+            {paginationItems.map(
+              ({ page, showEllipsisBefore, showEllipsisAfter }) => (
+                <div key={page} className="flex items-center">
+                  {showEllipsisBefore && (
+                    <span className="mx-1 text-gray-500">...</span>
+                  )}
+                  <button
+                    onClick={() => changePage(page)}
+                    className={`mx-1 w-8 h-8 flex items-center justify-center rounded-full ${
+                      currentPage === page
+                        ? "bg-purple-600 text-white"
+                        : "text-white hover:bg-gray-700"
+                    }`}
+                    aria-label={`Página ${page}`}
+                    aria-current={currentPage === page ? "page" : undefined}
+                  >
+                    {page}
+                  </button>
+                  {showEllipsisAfter && (
+                    <span className="mx-1 text-gray-500">...</span>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+          <button
+            onClick={() => changePage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`mx-1 p-2 rounded-full ${
+              currentPage === totalPages
+                ? "text-gray-500 cursor-not-allowed"
+                : "text-white hover:bg-gray-700"
+            }`}
+            aria-label="Próxima página"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    );
+  },
+  // Add proper equality check for memo
+  (prevProps, nextProps) => {
+    return (
+      prevProps.currentPage === nextProps.currentPage &&
+      prevProps.totalPages === nextProps.totalPages
+    );
+  }
+);
+
+Pagination.displayName = "Pagination";
+
+// Optimized ImageViewer with better error handling and reduced re-renders
+const ImageViewer = memo(
+  ({
+    selectedImage,
+    closeImageViewer,
+    navigateImage,
+    totalImagesCount,
+  }: {
+    selectedImage: { id: number; url: string; title: string } | null;
+    closeImageViewer: () => void;
+    navigateImage: (direction: "next" | "prev") => void;
+    totalImagesCount: number;
+  }) => {
+    if (!selectedImage) return null;
+
+    // Create error handling function outside of JSX for better organization
+    const handleImageError = () => {
+      const container = document.querySelector(".image-viewer-container");
+      if (container) {
+        container.innerHTML = `
+          <div class="bg-gray-800 flex items-center justify-center h-[50vh] rounded-lg w-full">
+            <div class="text-center text-gray-400">
+              <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-xl">Não foi possível carregar esta imagem</p>
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    return (
+      <div
+        className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
+        onClick={closeImageViewer}
+      >
+        <div className="relative max-w-6xl max-h-screen p-4">
+          <div
+            className="relative image-viewer-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={selectedImage.url}
+              alt={selectedImage.title}
+              width={1200}
+              height={800}
+              className="max-w-full max-h-[90vh] object-contain mx-auto"
+              unoptimized={true}
+              priority={true}
+              onError={handleImageError}
+            />
+          </div>
+          <button
+            className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateImage("prev");
+            }}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button
+            className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateImage("next");
+            }}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+          <button
+            className="absolute top-4 right-4 bg-black bg-opacity-50 hover:bg-opacity-70 p-2 rounded-full text-white"
+            onClick={closeImageViewer}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <div className="absolute bottom-6 left-0 right-0 text-center text-white bg-black bg-opacity-60 py-2 px-4 mx-auto w-fit rounded-full">
+            {selectedImage.title}{" "}
+            <span className="opacity-70">
+              ({selectedImage.id} de {totalImagesCount})
+            </span>
           </div>
         </div>
-      )}
-      {isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end">
-          <div className="p-4 w-full">
-            <p className="text-white text-sm font-medium truncate">{alt}</p>
-          </div>
-        </div>
-      )}
-    </motion.div>
-  );
-};
+      </div>
+    );
+  },
+  // Implement proper equality check for memo
+  (prevProps, nextProps) => {
+    if (!prevProps.selectedImage && !nextProps.selectedImage) return true;
+    if (!prevProps.selectedImage || !nextProps.selectedImage) return false;
+
+    return (
+      prevProps.selectedImage.id === nextProps.selectedImage.id &&
+      prevProps.selectedImage.url === nextProps.selectedImage.url &&
+      prevProps.totalImagesCount === nextProps.totalImagesCount
+    );
+  }
+);
+
+ImageViewer.displayName = "ImageViewer";
 
 interface CloudinaryExplorerProps {
   folderPath: string;
@@ -91,6 +376,7 @@ export default function CloudinaryExplorer({
   description,
   date,
 }: CloudinaryExplorerProps) {
+  // Improved state management with better initialization
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedImage, setSelectedImage] = useState<{
@@ -100,38 +386,77 @@ export default function CloudinaryExplorer({
   } | null>(null);
 
   // States for managing images loaded from API
-  const [allLoadedImages, setAllLoadedImages] = useState<CloudinaryImage[]>([]);
+  const [allLoadedImages, setAllLoadedImages] = useState<CloudinaryImage[]>(
+    initialAlbumImages || []
+  );
   const [pageImages, setPageImages] = useState<CloudinaryImage[]>([]);
-  const [totalImagesCount, setTotalImagesCount] = useState(initialTotalImages);
+  const [totalImagesCount, setTotalImagesCount] = useState(
+    initialTotalImages || 0
+  );
   const [loadError, setLoadError] = useState(false);
 
-  // New states for cursor-based pagination
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [hasMoreImages, setHasMoreImages] = useState(true);
+  // Calculate total pages only when needed
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(totalImagesCount / IMAGES_PER_PAGE));
+  }, [totalImagesCount]);
 
-  const totalPages = Math.ceil(totalImagesCount / IMAGES_PER_PAGE);
+  // Memoize API endpoint selection to avoid recalculation
+  const getApiEndpoint = useCallback((path: string) => {
+    if (path === "2") return "/api/gallery/white-emotion";
+    if (path === "3") return "/api/gallery/hula-hula";
+    return `/api/cloudinary/${path}`;
+  }, []);
 
-  // Function to load images from API
-  const fetchImagesFromApi = async () => {
+  // Function to extract a valid image URL - memoized for performance
+  const getValidImageUrl = useCallback((url: string) => {
+    if (url.startsWith("http") || url.startsWith("https")) {
+      return url;
+    }
+
+    try {
+      let publicId = url;
+      if (url.includes("/")) {
+        const parts = url.split("/");
+        publicId = parts[parts.length - 1].split(".")[0];
+      }
+
+      return buildCloudinaryUrl(publicId, {
+        width: 1200,
+        height: 1200,
+        crop: "limit",
+        quality: "auto",
+      });
+    } catch (error) {
+      console.error("Error creating valid image URL:", error);
+      return url;
+    }
+  }, []);
+
+  // Helper function to update page images - memoized
+  const updatePageImages = useCallback(
+    (images: CloudinaryImage[], page: number) => {
+      const startIndex = (page - 1) * IMAGES_PER_PAGE;
+      const endIndex = Math.min(startIndex + IMAGES_PER_PAGE, images.length);
+      setPageImages(images.slice(startIndex, endIndex));
+    },
+    []
+  );
+
+  // Optimized function to load images from API with fetch abort controller
+  const fetchImagesFromApi = useCallback(async () => {
     setLoading(true);
     setLoadError(false);
 
+    // Use AbortController to cancel previous requests
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     try {
-      // Mapear o folderPath para a rota de API correta
-      let apiEndpoint = "";
-
-      // Use o mesmo mapeamento que definimos no cloudinaryService
-      if (folderPath === "2") {
-        apiEndpoint = "/api/gallery/white-emotion";
-      } else if (folderPath === "3") {
-        apiEndpoint = "/api/gallery/hula-hula";
-      } else {
-        // Fallback para a rota genérica se não houver mapeamento específico
-        apiEndpoint = `/api/cloudinary/${folderPath}`;
-      }
-
-      // Fetch images from our API route with reduced batch size (100 instead of 500)
-      const response = await fetch(`${apiEndpoint}?max_results=100`);
+      const apiEndpoint = getApiEndpoint(folderPath);
+      const response = await fetch(`${apiEndpoint}?max_results=100`, {
+        signal, // Pass the signal to allow request cancellation
+        cache: "force-cache", // Add caching strategy
+      });
 
       if (!response.ok) {
         throw new Error(`API responded with status: ${response.status}`);
@@ -152,211 +477,157 @@ export default function CloudinaryExplorer({
 
         setAllLoadedImages(fetchedImages);
         setTotalImagesCount(data.total || fetchedImages.length);
-        setNextCursor(data.nextCursor || null);
-        setHasMoreImages(!!data.nextCursor);
 
         // Set images for current page
         updatePageImages(fetchedImages, currentPage);
       } else {
-        console.error("Invalid API response format", data);
         throw new Error("Invalid API response format");
       }
     } catch (error) {
-      console.error("Error fetching images from API:", error);
-      setLoadError(true);
+      // Only show error if it's not an abort error
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        console.error("Error fetching images from API:", error);
+        setLoadError(true);
 
-      // Fall back to initial images
-      setAllLoadedImages(initialAlbumImages);
-      updatePageImages(initialAlbumImages, currentPage);
+        // Fall back to initial images
+        setAllLoadedImages(initialAlbumImages);
+        updatePageImages(initialAlbumImages, currentPage);
+      }
     } finally {
       setLoading(false);
     }
-  };
 
-  // New function to load more images
-  const loadMoreImages = async () => {
-    if (!nextCursor || !hasMoreImages || loading) return;
-
-    setLoading(true);
-
-    try {
-      // Mapear o folderPath para a rota de API correta
-      let apiEndpoint = "";
-
-      // Use o mesmo mapeamento que definimos no cloudinaryService
-      if (folderPath === "2") {
-        apiEndpoint = "/api/gallery/white-emotion";
-      } else if (folderPath === "3") {
-        apiEndpoint = "/api/gallery/hula-hula";
-      } else {
-        // Fallback para a rota genérica se não houver mapeamento específico
-        apiEndpoint = `/api/cloudinary/${folderPath}`;
-      }
-
-      const response = await fetch(
-        `${apiEndpoint}?max_results=100&next_cursor=${nextCursor}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.images && Array.isArray(data.images)) {
-        const newImages: CloudinaryImage[] = data.images.map(
-          (img: any, index: number) => ({
-            id: allLoadedImages.length + index + 1,
-            title: `${title} - Foto ${allLoadedImages.length + index + 1}`,
-            url: img.url,
-            date: date,
-            identifier: img.publicId,
-          })
-        );
-
-        // Append new images instead of replacing
-        const updatedImages = [...allLoadedImages, ...newImages];
-        setAllLoadedImages(updatedImages);
-        setTotalImagesCount(data.total || updatedImages.length);
-        setNextCursor(data.nextCursor || null);
-        setHasMoreImages(!!data.nextCursor);
-
-        // Update the current page view if needed
-        if (
-          currentPage === Math.ceil(allLoadedImages.length / IMAGES_PER_PAGE)
-        ) {
-          updatePageImages(updatedImages, currentPage);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading more images:", error);
-      setLoadError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper function to update page images
-  const updatePageImages = (images: CloudinaryImage[], page: number) => {
-    const startIndex = (page - 1) * IMAGES_PER_PAGE;
-    const endIndex = Math.min(startIndex + IMAGES_PER_PAGE, images.length);
-    setPageImages(images.slice(startIndex, endIndex));
-  };
+    // Return cleanup function to abort fetch if component unmounts
+    return () => {
+      controller.abort();
+    };
+  }, [
+    folderPath,
+    getApiEndpoint,
+    updatePageImages,
+    initialAlbumImages,
+    currentPage,
+    title,
+    date,
+  ]);
 
   // Effect to load images when component mounts or folderPath changes
   useEffect(() => {
-    fetchImagesFromApi();
-  }, [folderPath]);
+    const fetchImages = fetchImagesFromApi();
 
-  // Effect to update page images when current page changes
+    // Cleanup function
+    return () => {
+      fetchImages.then((cleanup) => {
+        if (cleanup) cleanup();
+      });
+    };
+  }, [folderPath, fetchImagesFromApi]);
+
+  // Effect to update page images when current page changes - optimized to avoid unnecessary updates
   useEffect(() => {
     if (allLoadedImages.length > 0) {
       updatePageImages(allLoadedImages, currentPage);
-
-      // Load more images if we're near the end and more are available
-      const startIndex = (currentPage - 1) * IMAGES_PER_PAGE;
-      if (
-        hasMoreImages &&
-        startIndex + IMAGES_PER_PAGE >= allLoadedImages.length - IMAGES_PER_PAGE
-      ) {
-        loadMoreImages();
-      }
     }
-  }, [currentPage]);
+  }, [currentPage, allLoadedImages, updatePageImages]);
 
-  const changePage = (page: number) => {
+  // Handler for changing pages with debounce to prevent rapid multiple clicks
+  const changePage = useCallback((page: number) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setCurrentPage(page);
-  };
+    // Add simple debounce to prevent rapid page changes
+    setTimeout(() => {
+      setCurrentPage(page);
+    }, 100);
+  }, []);
 
-  const openImageViewer = (image: {
-    id: number;
-    url: string;
-    title: string;
-  }) => {
-    // Extract the image identifier from the URL
-    let imageId = "";
-    if (image.url.includes("/upload/")) {
-      const parts = image.url.split("/");
-      imageId = parts[parts.length - 1].split(".")[0]; // Remove extension
-    } else {
-      imageId = image.url;
-    }
+  // Handler for opening image viewer - memoized
+  const openImageViewer = useCallback(
+    (image: { id: number; url: string; title: string }) => {
+      // Make sure we have a valid URL for the Next.js Image component
+      const validUrl = getValidImageUrl(image.url);
+      setSelectedImage({
+        ...image,
+        url: validUrl,
+      });
+      document.body.style.overflow = "hidden";
+    },
+    [getValidImageUrl]
+  );
 
-    const largeUrl = buildCloudinaryUrl(imageId, {
-      width: 1200,
-      height: 1200,
-      crop: "limit",
-      quality: "auto",
-    });
-
-    setSelectedImage({ ...image, url: largeUrl });
-    document.body.style.overflow = "hidden";
-  };
-
-  const closeImageViewer = () => {
+  // Handler for closing image viewer - memoized
+  const closeImageViewer = useCallback(() => {
     setSelectedImage(null);
     document.body.style.overflow = "auto";
-  };
+  }, []);
 
-  const navigateImage = (direction: "next" | "prev") => {
-    if (!selectedImage) return;
+  // Optimized handler for navigating images - reducing unnecessary recalculations
+  const navigateImage = useCallback(
+    (direction: "next" | "prev") => {
+      if (!selectedImage) return;
 
-    // Find the current index in the full array of images
-    const currentImageId = selectedImage.id;
-    const currentPageIndex = pageImages.findIndex(
-      (img) => img.id === currentImageId
-    );
+      // Find the current index in the full array of images
+      const currentImageId = selectedImage.id;
+      const currentPageIndex = pageImages.findIndex(
+        (img) => img.id === currentImageId
+      );
 
-    if (currentPageIndex === -1) return;
+      if (currentPageIndex === -1) return;
 
-    let newIndex: number;
+      let newIndex: number;
 
-    if (direction === "next") {
-      // If we're at the end of the current page, load next page
-      if (
-        currentPageIndex === pageImages.length - 1 &&
-        currentPage < totalPages
-      ) {
-        changePage(currentPage + 1);
-        newIndex = 0; // First image of the new page
+      if (direction === "next") {
+        if (
+          currentPageIndex === pageImages.length - 1 &&
+          currentPage < totalPages
+        ) {
+          changePage(currentPage + 1);
+          newIndex = 0; // First image of the new page
+        } else {
+          newIndex = (currentPageIndex + 1) % pageImages.length;
+        }
       } else {
-        newIndex = (currentPageIndex + 1) % pageImages.length;
-      }
-    } else {
-      // If we're at the start of the current page, load previous page
-      if (currentPageIndex === 0 && currentPage > 1) {
-        changePage(currentPage - 1);
-        newIndex = IMAGES_PER_PAGE - 1; // Last image of previous page
-      } else {
-        newIndex =
-          (currentPageIndex - 1 + pageImages.length) % pageImages.length;
-      }
-    }
-
-    // Only proceed if we have a valid image
-    if (newIndex >= 0 && newIndex < pageImages.length) {
-      const newImage = pageImages[newIndex];
-
-      // Extract the image identifier from the URL
-      let imageId = "";
-      if (newImage.url.includes("/upload/")) {
-        const parts = newImage.url.split("/");
-        imageId = parts[parts.length - 1].split(".")[0]; // Remove extension
-      } else {
-        imageId = newImage.url;
+        if (currentPageIndex === 0 && currentPage > 1) {
+          changePage(currentPage - 1);
+          newIndex = IMAGES_PER_PAGE - 1; // Last image of previous page
+        } else {
+          newIndex =
+            (currentPageIndex - 1 + pageImages.length) % pageImages.length;
+        }
       }
 
-      const largeUrl = buildCloudinaryUrl(imageId, {
-        width: 1200,
-        height: 1200,
-        crop: "limit",
-        quality: "auto",
-      });
+      // Only proceed if we have a valid image
+      if (newIndex >= 0 && newIndex < pageImages.length) {
+        const newImage = pageImages[newIndex];
+        // Create a valid URL for the Next.js Image component
+        const validUrl = getValidImageUrl(newImage.url);
+        setSelectedImage({
+          ...newImage,
+          url: validUrl,
+        });
+      }
+    },
+    [
+      selectedImage,
+      pageImages,
+      currentPage,
+      totalPages,
+      changePage,
+      getValidImageUrl,
+    ]
+  );
 
-      setSelectedImage({ ...newImage, url: largeUrl });
-    }
-  };
+  // Memoize the page information to prevent unnecessary recalculations
+  const pageInfo = useMemo(() => {
+    if (totalPages <= 1) return null;
+
+    const startItem = (currentPage - 1) * IMAGES_PER_PAGE + 1;
+    const endItem = Math.min(currentPage * IMAGES_PER_PAGE, totalImagesCount);
+
+    return {
+      startItem,
+      endItem,
+      totalItems: totalImagesCount,
+    };
+  }, [currentPage, totalImagesCount, totalPages]);
 
   return (
     <div className="text-white">
@@ -416,12 +687,11 @@ export default function CloudinaryExplorer({
           </div>
         </div>
 
-        {totalPages > 1 && (
+        {pageInfo && (
           <div className="mb-6 text-center">
             <p className="text-gray-400 text-sm">
-              Mostrando {(currentPage - 1) * IMAGES_PER_PAGE + 1} -{" "}
-              {Math.min(currentPage * IMAGES_PER_PAGE, totalImagesCount)} de{" "}
-              {totalImagesCount} fotos
+              Mostrando {pageInfo.startItem} - {pageInfo.endItem} de{" "}
+              {pageInfo.totalItems} fotos
             </p>
           </div>
         )}
@@ -453,7 +723,7 @@ export default function CloudinaryExplorer({
               apenas as imagens disponíveis.
             </p>
             <button
-              onClick={fetchImagesFromApi}
+              onClick={() => fetchImagesFromApi()}
               className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
             >
               Tentar novamente
@@ -471,7 +741,7 @@ export default function CloudinaryExplorer({
             >
               {pageImages.map((image, index) => (
                 <ImageCard
-                  key={image.id}
+                  key={`${image.id}-${currentPage}`} // Add currentPage to key to force new instances on page change
                   url={image.url}
                   alt={image.title}
                   onClick={() => openImageViewer(image)}
@@ -507,228 +777,19 @@ export default function CloudinaryExplorer({
           </div>
         )}
 
-        {totalPages > 1 && (
-          <div className="mt-10 flex justify-center">
-            <nav className="flex items-center">
-              <button
-                onClick={() => changePage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`mx-1 p-2 rounded-full ${currentPage === 1 ? "text-gray-500 cursor-not-allowed" : "text-white hover:bg-gray-700"}`}
-                aria-label="Página anterior"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-              <div className="flex">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(
-                    (page) =>
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                  )
-                  .map((page, index, array) => {
-                    const showEllipsisBefore =
-                      index > 0 && array[index - 1] !== page - 1;
-                    const showEllipsisAfter =
-                      index < array.length - 1 && array[index + 1] !== page + 1;
-                    return (
-                      <div key={page} className="flex items-center">
-                        {showEllipsisBefore && (
-                          <span className="mx-1 text-gray-500">...</span>
-                        )}
-                        <button
-                          onClick={() => changePage(page)}
-                          className={`mx-1 w-8 h-8 flex items-center justify-center rounded-full ${currentPage === page ? "bg-purple-600 text-white" : "text-white hover:bg-gray-700"}`}
-                          aria-label={`Página ${page}`}
-                          aria-current={
-                            currentPage === page ? "page" : undefined
-                          }
-                        >
-                          {page}
-                        </button>
-                        {showEllipsisAfter && (
-                          <span className="mx-1 text-gray-500">...</span>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-              <button
-                onClick={() => changePage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`mx-1 p-2 rounded-full ${currentPage === totalPages ? "text-gray-500 cursor-not-allowed" : "text-white hover:bg-gray-700"}`}
-                aria-label="Próxima página"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </nav>
-          </div>
-        )}
-
-        {/* Add Load More button */}
-        {hasMoreImages && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={loadMoreImages}
-              disabled={loading}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Carregando...
-                </span>
-              ) : (
-                "Carregar mais fotos"
-              )}
-            </button>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          changePage={changePage}
+        />
       </div>
 
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
-          onClick={closeImageViewer}
-        >
-          <div className="relative max-w-6xl max-h-screen p-4">
-            <img
-              src={selectedImage.url}
-              alt={selectedImage.title}
-              className="max-w-full max-h-[90vh] object-contain mx-auto"
-              onClick={(e) => e.stopPropagation()}
-              onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement;
-                target.style.display = "none";
-                const container = target.parentElement;
-                if (container) {
-                  const fallback = document.createElement("div");
-                  fallback.className =
-                    "bg-gray-800 flex items-center justify-center w-full h-[50vh] rounded-lg";
-                  fallback.innerHTML = `
-                    <div class="text-center text-gray-400">
-                      <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <p class="text-xl">Não foi possível carregar esta imagem</p>
-                    </div>
-                  `;
-                  container.appendChild(fallback);
-                }
-              }}
-            />
-            <button
-              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full text-white"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateImage("prev");
-              }}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full text-white"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateImage("next");
-              }}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-            <button
-              className="absolute top-4 right-4 bg-black bg-opacity-50 hover:bg-opacity-70 p-2 rounded-full text-white"
-              onClick={closeImageViewer}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <div className="absolute bottom-6 left-0 right-0 text-center text-white bg-black bg-opacity-60 py-2 px-4 mx-auto w-fit rounded-full">
-              {selectedImage.title}{" "}
-              <span className="opacity-70">
-                ({selectedImage.id} de {totalImagesCount})
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ImageViewer
+        selectedImage={selectedImage}
+        closeImageViewer={closeImageViewer}
+        navigateImage={navigateImage}
+        totalImagesCount={totalImagesCount}
+      />
     </div>
   );
 }

@@ -1,29 +1,28 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { galleryCollections } from "@/data/gallery";
 
 export default function AlbumPage() {
-  // Buscar a coleção MyAlbum (ID 1)
   const myAlbumCollection = galleryCollections.find(
     (collection) => collection.id === 1
   );
 
-  // Garantir que temos imagens para exibir
-  const coverImages = myAlbumCollection?.coverImages || [
-    myAlbumCollection?.coverImage || "/img/bclandia.jpg",
-  ];
+  const coverImages = useMemo(
+    () =>
+      myAlbumCollection?.coverImages || [
+        myAlbumCollection?.coverImage || "/img/bclandia.jpg",
+      ],
+    [myAlbumCollection]
+  );
 
-  // URL para o álbum
   const albumUrl =
     myAlbumCollection?.url || "https://myalbum.com/album/f26Bcff3zfWNbE/";
 
-  // Estado para a imagem atual
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [coverImage, setCoverImage] = useState(coverImages[0]);
 
-  // Efeito para rotacionar as imagens a cada 5 segundos
   useEffect(() => {
     if (coverImages.length <= 1) return;
 
@@ -33,7 +32,7 @@ export default function AlbumPage() {
         setCoverImage(coverImages[newIndex]);
         return newIndex;
       });
-    }, 5000); // Altera a imagem a cada 5 segundos
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [coverImages]);
@@ -47,7 +46,6 @@ export default function AlbumPage() {
         Explore nossas coleções de fotos dos eventos e bastidores da BadCompany.
       </p>
 
-      {/* Navegação */}
       <div className="mb-10 flex overflow-x-auto pb-2 scrollbar-hide">
         <div className="flex space-x-2 mx-auto">
           <Link
@@ -71,7 +69,6 @@ export default function AlbumPage() {
         </div>
       </div>
 
-      {/* Conteúdo do Álbum MyAlbum com capa rotativa */}
       <div className="max-w-6xl mx-auto mb-16">
         <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg p-4">
           <h2 className="text-xl font-bold text-white mb-4 flex justify-between items-center">
@@ -88,12 +85,12 @@ export default function AlbumPage() {
               rel="noopener noreferrer"
               className="block transition-transform duration-300 hover:scale-[1.01]"
             >
-              {/* Imagem de capa dinâmica */}
               <div className="aspect-video w-full relative">
-                <img
+                <Image
                   src={coverImage}
                   alt={`Foto do ${myAlbumCollection?.title || "Álbum BadCompany"} ${currentImageIndex + 1}`}
-                  className="w-full h-full object-cover rounded-lg shadow-lg"
+                  fill
+                  className="rounded-lg shadow-lg object-cover"
                   style={{ transition: "opacity 1s ease-in-out" }}
                 />
               </div>
@@ -119,7 +116,6 @@ export default function AlbumPage() {
             </a>
           </div>
 
-          {/* Controles manuais para mudar de imagem */}
           <div className="flex justify-center mt-4 space-x-2">
             {coverImages.map((_, index) => (
               <button
