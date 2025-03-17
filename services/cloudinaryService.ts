@@ -7,10 +7,10 @@ import { CloudinaryImage, CloudinaryAlbum } from "@/types/media";
 const CLOUDINARY_CLOUD_NAME = process.env
   .NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME as string;
 
-// Map of folder prefixes for each album
-const ALBUM_FOLDERS: Record<string, string> = {
-  "2": "white-motion-24", // White Emotion 2024
-  "3": "hula-hula-23", // Hula Hula 2023
+// Map of folder paths to their API endpoints
+const API_ENDPOINTS: Record<string, string> = {
+  "white-emotion": "/api/gallery/white-emotion",
+  "hula-hula": "/api/gallery/hula-hula",
 };
 
 // Cache for API responses to avoid repeated calls
@@ -51,55 +51,114 @@ export async function fetchCloudinaryImages(
   folderPath: string
 ): Promise<CloudinaryImage[]> {
   try {
-    const albumId = folderPath;
-
     // Check if we've already cached this request
     if (imageCache[folderPath] && imageCache[folderPath].length > 0) {
       return imageCache[folderPath];
     }
 
-    // Use our server API instead of direct Cloudinary API
+    // Map the folder path to the corresponding API endpoint
     let apiEndpoint = "";
-
-    // Map to the correct API endpoint based on the folder
-    if (ALBUM_FOLDERS[folderPath] === "white-motion-24") {
-      apiEndpoint = "/api/gallery/white-emotion";
-    } else if (ALBUM_FOLDERS[folderPath] === "hula-hula-23") {
-      apiEndpoint = "/api/gallery/hula-hula";
+    if (folderPath === "white-emotion") {
+      apiEndpoint = API_ENDPOINTS["white-emotion"];
+    } else if (folderPath === "hula-hula") {
+      apiEndpoint = API_ENDPOINTS["hula-hula"];
     } else {
-      throw new Error(
-        `No API endpoint configured for folder path: ${folderPath}`
+      // For other folder paths, try to use a direct mapping
+      apiEndpoint = API_ENDPOINTS[folderPath];
+
+      if (!apiEndpoint) {
+        console.warn(
+          `No API endpoint configured for folder path: ${folderPath}. Using fallback method.`
+        );
+        return getFallbackImages(folderPath);
+      }
+    }
+
+    // Initialize variables for pagination
+    let allImages: CloudinaryImage[] = [];
+    let nextCursor: string | null = null;
+    let hasMore = true;
+
+    // Fetch all pages
+    while (hasMore) {
+      // Add cursor to URL if we have one
+      const url: string = nextCursor
+        ? `${apiEndpoint}?next_cursor=${encodeURIComponent(nextCursor)}&max_results=100`
+        : `${apiEndpoint}?max_results=100`;
+
+      const response: Response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+
+      const data: {
+        images?: CloudinaryImage[];
+        nextCursor?: string;
+        total?: number;
+      } = await response.json();
+
+      if (!data.images || !Array.isArray(data.images)) {
+        console.error("Invalid API response structure:", data);
+        break;
+      }
+
+      // Add this batch to our collection
+      allImages = [...allImages, ...data.images];
+
+      // Check if there are more images to fetch
+      if (data.nextCursor) {
+        nextCursor = data.nextCursor;
+      } else {
+        hasMore = false;
+      }
+
+      // Safety check - break if we have all images based on total count
+      if (data.total && allImages.length >= data.total) {
+        hasMore = false;
+      }
+
+      // Add some logging
+      console.log(
+        `Fetched ${data.images.length} images, total so far: ${allImages.length}, hasMore: ${hasMore}`
       );
     }
 
-    // Call our server API
-    const response = await fetch(apiEndpoint);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.images || !Array.isArray(data.images)) {
-      console.error("Invalid API response structure:", data);
-      return [];
-    }
-
-    // Use the transformed images directly from our API
-    const images: CloudinaryImage[] = data.images;
-
     // Cache the results
-    imageCache[folderPath] = images;
+    imageCache[folderPath] = allImages;
 
-    return images;
+    return allImages;
   } catch (error) {
     console.error("Error fetching Cloudinary images:", error);
-    return [];
+    return getFallbackImages(folderPath);
   }
 }
 
-// Client-side compatible version that uses known patterns when API is not available
+// Fallback method to get images when API is not available or fails
+function getFallbackImages(folderPath: string): CloudinaryImage[] {
+  console.log(`Using fallback method for folder: ${folderPath}`);
+
+  // Try to find album info in gallery data
+  const albumInfo = galleryData.cloudinaryGalleryCollections.find(
+    (album) => album.id.toString() === folderPath
+  );
+
+  if (!albumInfo) {
+    console.error(`No album info found for folder path: ${folderPath}`);
+    return [];
+  }
+
+  // Use cover images as fallback
+  return albumInfo.coverImages.map((imageUrl, index) => ({
+    id: index + 1,
+    title: `${albumInfo.title} - Foto ${index + 1}`,
+    url: imageUrl,
+    date: albumInfo.date,
+    identifier: `fallback-${index}`,
+  }));
+}
+
+// Client-side compatible version that fetches a subset of images
 export function getAlbumImages(
   folderPath: string = "",
   count: number = 24,
@@ -114,7 +173,7 @@ export function getAlbumImages(
     return imageCache[folderPath].slice(startIndex, endIndex);
   }
 
-  // Fall back to pattern-based approach if no cache
+  // Fall back to getting cover images from the album info
   const albumInfo = galleryData.cloudinaryGalleryCollections.find(
     (a) => a.id.toString() === folderPath
   );
@@ -123,79 +182,20 @@ export function getAlbumImages(
     return [];
   }
 
-  // Extract known image identifiers from the album info
-  const knownIdentifiers = albumInfo.coverImages
-    .map((url) => {
-      const match = url.match(/upload\/v\d+\/(.+)\.jpg$/);
-      return match ? match[1] : "";
-    })
-    .filter((id) => id !== "");
+  const coverImages = albumInfo.coverImages.map((imageUrl, index) => ({
+    id: startIndex + index + 1,
+    title: `${albumInfo.title} - Foto ${startIndex + index + 1}`,
+    url: imageUrl,
+    date: albumInfo.date,
+    identifier: `cover-${index}`,
+  }));
 
-  // If we have enough known identifiers, use those
-  if (knownIdentifiers.length >= startIndex + count) {
-    const selectedIdentifiers = knownIdentifiers.slice(
-      startIndex,
-      startIndex + count
-    );
-
-    return selectedIdentifiers.map((identifier, index) => ({
-      id: startIndex + index + 1,
-      title: `${albumInfo.title} - Foto ${startIndex + index + 1}`,
-      url: buildCloudinaryUrl(identifier),
-      date: albumInfo.date,
-      identifier,
-    }));
+  // If we don't have enough cover images, just return what we have
+  if (coverImages.length <= startIndex) {
+    return [];
   }
 
-  // Otherwise, generate patterns based on known identifiers
-  const folderPrefix = ALBUM_FOLDERS[folderPath] || "";
-  const results: CloudinaryImage[] = [];
-
-  // Use known identifiers first
-  for (let i = 0; i < Math.min(knownIdentifiers.length, count); i++) {
-    if (i + startIndex >= knownIdentifiers.length) break;
-
-    results.push({
-      id: startIndex + i + 1,
-      title: `${albumInfo.title} - Foto ${startIndex + i + 1}`,
-      url: buildCloudinaryUrl(knownIdentifiers[startIndex + i]),
-      date: albumInfo.date,
-      identifier: knownIdentifiers[startIndex + i],
-    });
-  }
-
-  // Generate additional identifiers if needed
-  const remaining = count - results.length;
-
-  if (remaining > 0 && folderPrefix) {
-    // Extract number patterns from known identifiers
-    const numberPatterns: number[] = [];
-    knownIdentifiers.forEach((id) => {
-      const match = id.match(new RegExp(`${folderPrefix}_(\\d+)`));
-      if (match && match[1]) {
-        numberPatterns.push(parseInt(match[1]));
-      }
-    });
-
-    // Generate sequential numbers starting from the highest known number
-    const startNum = Math.max(0, ...numberPatterns);
-
-    for (let i = 0; i < remaining; i++) {
-      const num = startNum + i + 1;
-      // Generate an identifier with the number and a placeholder for the random part
-      const identifier = `${folderPrefix}_${num.toString().padStart(3, "0")}`;
-
-      results.push({
-        id: startIndex + results.length + 1,
-        title: `${albumInfo.title} - Foto ${startIndex + results.length + 1}`,
-        url: buildCloudinaryUrl(identifier),
-        date: albumInfo.date,
-        identifier,
-      });
-    }
-  }
-
-  return results;
+  return coverImages.slice(startIndex, startIndex + count);
 }
 
 export function getImageCountInFolder(folderPath: string): number {

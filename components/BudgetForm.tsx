@@ -217,7 +217,7 @@ export default function BudgetForm({
             >
               <option value="">Selecione o tipo de evento</option>
               <option value="bclandia">BCLândia</option>
-              <option value="white-emotion">White Emotion</option>
+              <option value="whiteEmotion-24">White Emotion</option>
               <option value="bc-best">BC Best</option>
               <option value="casa-assombrada">A Casa Assombrada</option>
               <option value="monsanto-fest">Monsanto Fest</option>

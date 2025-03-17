@@ -402,7 +402,7 @@ export default function CloudinaryExplorer({
 
   // Memoize API endpoint selection to avoid recalculation
   const getApiEndpoint = useCallback((path: string) => {
-    if (path === "2") return "/api/gallery/white-emotion";
+    if (path === "2") return "/api/gallery/whiteEmotion-24";
     if (path === "3") return "/api/gallery/hula-hula";
     return `/api/cloudinary/${path}`;
   }, []);

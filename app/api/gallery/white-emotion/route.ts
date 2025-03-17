@@ -1,4 +1,4 @@
-// app/api/gallery/white-emotion/route.ts
+// app/api/gallery/whiteEmotion-24/route.ts
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -11,18 +11,17 @@ cloudinary.config({
 
 // Correct the folder name to match what's in your Cloudinary account
 const FOLDER_NAME = "whiteEmotion-24";
-const PUBLIC_ID_PREFIX = "white-motion-24";
 
 export async function GET(request: Request) {
   try {
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const maxResults = parseInt(searchParams.get("max_results") || "500");
+    const maxResults = parseInt(searchParams.get("max_results") || "100");
     const nextCursor = searchParams.get("next_cursor") || undefined;
 
-    // Use a search based on the public_id prefix instead of folder
+    // Use a search based on the folder
     const result = await cloudinary.search
-      .expression(`public_id:${PUBLIC_ID_PREFIX}_*`)
+      .expression(`folder:${FOLDER_NAME}`)
       .sort_by("public_id", "asc")
       .max_results(maxResults)
       .next_cursor(nextCursor)
@@ -30,7 +29,7 @@ export async function GET(request: Request) {
 
     // Add debug log
     console.log(
-      `Found ${result.resources?.length || 0} images for White Emotion`
+      `Found ${result.resources?.length || 0} images for White Emotion, next_cursor: ${result.next_cursor || "none"}`
     );
 
     // Transform results to include only necessary data

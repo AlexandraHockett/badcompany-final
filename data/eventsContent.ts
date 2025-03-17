@@ -543,7 +543,7 @@ const pastEvents: Event[] = [
     },
   },
   {
-    id: "bc-best-white-emotion-2022",
+    id: "bc-best-whiteEmotion-24-2022",
     title: "BC Best White Emotion",
     description: "Noite mágica.",
     longDescription:

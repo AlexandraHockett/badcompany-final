@@ -12,13 +12,11 @@ cloudinary.config({
 // Folder name as seen in your Cloudinary account
 const FOLDER_NAME = "hula-hula-23";
 // We're assuming the public_id prefix matches the folder name in this case
-const PUBLIC_ID_PREFIX = "hula-hula-23";
-
 export async function GET(request: Request) {
   try {
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const maxResults = parseInt(searchParams.get("max_results") || "500");
+    const maxResults = parseInt(searchParams.get("max_results") || "100");
     const nextCursor = searchParams.get("next_cursor") || undefined;
 
     // Use a search based on the folder
@@ -30,7 +28,9 @@ export async function GET(request: Request) {
       .execute();
 
     // Add debug log
-    console.log(`Found ${result.resources?.length || 0} images for Hula Hula`);
+    console.log(
+      `Found ${result.resources?.length || 0} images for White Emotion, next_cursor: ${result.next_cursor || "none"}`
+    );
 
     // Transform results to include only necessary data
     const images = result.resources
