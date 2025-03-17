@@ -441,40 +441,63 @@ export default function CloudinaryExplorer({
 
     try {
       const apiEndpoint = getApiEndpoint(folderPath);
-      const response = await fetch(`${apiEndpoint}?max_results=100`, {
-        signal,
-        cache: "no-store",
-      });
+      let nextCursor: string | null = null;
+      let allImages: CloudinaryImage[] = [];
 
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
+      interface CloudinaryApiResponse {
+        images?: Array<{
+          url: string;
+          publicId?: string;
+        }>;
+        nextCursor?: string;
+        total?: number;
       }
 
-      const data = await response.json();
+      do {
+        const url = nextCursor
+          ? `${apiEndpoint}?max_results=100&next_cursor=${encodeURIComponent(nextCursor)}`
+          : `${apiEndpoint}?max_results=100`;
 
-      if (data.images && Array.isArray(data.images)) {
-        const fetchedImages: CloudinaryImage[] = data.images.map(
-          (img: any, index: number) => ({
-            id: index + 1,
-            title: `${title} - Foto ${index + 1}`,
-            url: img.url,
-            date: date,
-            identifier: img.publicId,
-          })
-        );
-        setAllLoadedImages(fetchedImages);
-        setTotalImagesCount(data.total || fetchedImages.length);
-        updatePageImages(fetchedImages, currentPage);
-      } else {
-        throw new Error("Invalid API response format");
-      }
+        const response = await fetch(url, {
+          signal,
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`API responded with status: ${response.status}`);
+        }
+
+        const data: CloudinaryApiResponse = await response.json();
+
+        if (data.images && Array.isArray(data.images)) {
+          const fetchedImages: CloudinaryImage[] = data.images.map(
+            (img, index) => ({
+              id: allImages.length + index + 1,
+              title: `${title} - Foto ${allImages.length + index + 1}`,
+              url: img.url,
+              date: date,
+              identifier: img.publicId,
+            })
+          );
+
+          allImages = [...allImages, ...fetchedImages];
+          nextCursor = data.nextCursor || null;
+        } else {
+          throw new Error("Invalid API response format");
+        }
+      } while (nextCursor);
+
+      // Prefer allImages if not empty, otherwise fallback to initialAlbumImages
+      const imagesToSet = allImages.length > 0 ? allImages : initialAlbumImages;
+
+      setAllLoadedImages(imagesToSet);
+      setTotalImagesCount(imagesToSet.length);
+      updatePageImages(imagesToSet, currentPage);
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) {
-        console.error("Error fetching images from API:", error);
-        setLoadError(true);
-        setAllLoadedImages(initialAlbumImages);
-        updatePageImages(initialAlbumImages, currentPage);
-      }
+      console.error("Error fetching images:", error);
+      setLoadError(true);
+      setAllLoadedImages(initialAlbumImages);
+      updatePageImages(initialAlbumImages, currentPage);
     } finally {
       setLoading(false);
     }
@@ -486,8 +509,8 @@ export default function CloudinaryExplorer({
     currentPage,
     title,
     date,
-    initialAlbumImages,
     updatePageImages,
+    initialAlbumImages, // Added back initialAlbumImages to dependency array
   ]);
 
   useEffect(() => {
