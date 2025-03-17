@@ -1,4 +1,4 @@
-// app/api/gallery/whiteEmotion-24/route.ts
+// app/api/gallery/white-emotion/route.ts
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -9,8 +9,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Correct the folder name to match what's in your Cloudinary account
-const FOLDER_NAME = "whiteEmotion-24";
+// Matching the folder name exactly as used in the API endpoint path
+const FOLDER_NAME = "white-motion-24"; // Updated to match actual folder name
 
 export async function GET(request: Request) {
   try {

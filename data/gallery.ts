@@ -120,7 +120,7 @@ export const cloudinaryAlbums: CloudinaryAlbum[] =
   cloudinaryGalleryCollections.map((collection) => ({
     id: collection.id,
     name: collection.title,
-    folderPath: collection.id.toString(),
+    folderPath: collection.id.toString(), // Using ID as string for consistent mapping
     description: collection.description,
     date: collection.date,
     imageCount: collection.itemCount,
@@ -133,7 +133,7 @@ export const cloudinaryAlbums: CloudinaryAlbum[] =
     coverImage: collection.coverImages[0] || collection.coverImage,
   }));
 
-export default {
+const galleryData = {
   galleryCategories,
   galleryCollections,
   cloudinaryGalleryCollections,
@@ -141,3 +141,5 @@ export default {
   cloudinaryImages,
   cloudinaryAlbums,
 };
+
+export default galleryData;

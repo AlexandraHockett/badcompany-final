@@ -376,7 +376,6 @@ export default function CloudinaryExplorer({
   description,
   date,
 }: CloudinaryExplorerProps) {
-  // Improved state management with better initialization
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedImage, setSelectedImage] = useState<{
@@ -384,8 +383,6 @@ export default function CloudinaryExplorer({
     url: string;
     title: string;
   } | null>(null);
-
-  // States for managing images loaded from API
   const [allLoadedImages, setAllLoadedImages] = useState<CloudinaryImage[]>(
     initialAlbumImages || []
   );
@@ -395,31 +392,20 @@ export default function CloudinaryExplorer({
   );
   const [loadError, setLoadError] = useState(false);
 
-  // Calculate total pages only when needed
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(totalImagesCount / IMAGES_PER_PAGE));
   }, [totalImagesCount]);
 
-  // Memoize API endpoint selection to avoid recalculation
-  const getApiEndpoint = useCallback((path: string) => {
-    if (path === "2") return "/api/gallery/whiteEmotion-24";
-    if (path === "3") return "/api/gallery/hula-hula";
-    return `/api/cloudinary/${path}`;
-  }, []);
-
-  // Function to extract a valid image URL - memoized for performance
   const getValidImageUrl = useCallback((url: string) => {
     if (url.startsWith("http") || url.startsWith("https")) {
       return url;
     }
-
     try {
       let publicId = url;
       if (url.includes("/")) {
         const parts = url.split("/");
         publicId = parts[parts.length - 1].split(".")[0];
       }
-
       return buildCloudinaryUrl(publicId, {
         width: 1200,
         height: 1200,
@@ -432,30 +418,32 @@ export default function CloudinaryExplorer({
     }
   }, []);
 
-  // Helper function to update page images - memoized
   const updatePageImages = useCallback(
     (images: CloudinaryImage[], page: number) => {
       const startIndex = (page - 1) * IMAGES_PER_PAGE;
       const endIndex = Math.min(startIndex + IMAGES_PER_PAGE, images.length);
       setPageImages(images.slice(startIndex, endIndex));
     },
-    []
+    [] // No dependencies since setPageImages is stable
   );
 
-  // Optimized function to load images from API with fetch abort controller
+  const getApiEndpoint = useCallback((path: string) => {
+    if (path === "2") return "/api/gallery/white-emotion";
+    if (path === "3") return "/api/gallery/hula-hula";
+    return `/api/cloudinary/${path}`;
+  }, []);
+
   const fetchImagesFromApi = useCallback(async () => {
     setLoading(true);
     setLoadError(false);
-
-    // Use AbortController to cancel previous requests
     const controller = new AbortController();
     const signal = controller.signal;
 
     try {
       const apiEndpoint = getApiEndpoint(folderPath);
       const response = await fetch(`${apiEndpoint}?max_results=100`, {
-        signal, // Pass the signal to allow request cancellation
-        cache: "force-cache", // Add caching strategy
+        signal,
+        cache: "no-store",
       });
 
       if (!response.ok) {
@@ -474,22 +462,16 @@ export default function CloudinaryExplorer({
             identifier: img.publicId,
           })
         );
-
         setAllLoadedImages(fetchedImages);
         setTotalImagesCount(data.total || fetchedImages.length);
-
-        // Set images for current page
         updatePageImages(fetchedImages, currentPage);
       } else {
         throw new Error("Invalid API response format");
       }
     } catch (error) {
-      // Only show error if it's not an abort error
       if (!(error instanceof DOMException && error.name === "AbortError")) {
         console.error("Error fetching images from API:", error);
         setLoadError(true);
-
-        // Fall back to initial images
         setAllLoadedImages(initialAlbumImages);
         updatePageImages(initialAlbumImages, currentPage);
       }
@@ -497,74 +479,52 @@ export default function CloudinaryExplorer({
       setLoading(false);
     }
 
-    // Return cleanup function to abort fetch if component unmounts
-    return () => {
-      controller.abort();
-    };
+    return () => controller.abort();
   }, [
     folderPath,
     getApiEndpoint,
-    updatePageImages,
-    initialAlbumImages,
     currentPage,
     title,
     date,
+    initialAlbumImages,
+    updatePageImages,
   ]);
 
-  // Effect to load images when component mounts or folderPath changes
   useEffect(() => {
     const fetchImages = fetchImagesFromApi();
-
-    // Cleanup function
     return () => {
-      fetchImages.then((cleanup) => {
-        if (cleanup) cleanup();
-      });
+      fetchImages.then((cleanup) => cleanup && cleanup());
     };
-  }, [folderPath, fetchImagesFromApi]);
+  }, [fetchImagesFromApi]);
 
-  // Effect to update page images when current page changes - optimized to avoid unnecessary updates
   useEffect(() => {
     if (allLoadedImages.length > 0) {
       updatePageImages(allLoadedImages, currentPage);
     }
   }, [currentPage, allLoadedImages, updatePageImages]);
 
-  // Handler for changing pages with debounce to prevent rapid multiple clicks
   const changePage = useCallback((page: number) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    // Add simple debounce to prevent rapid page changes
-    setTimeout(() => {
-      setCurrentPage(page);
-    }, 100);
+    setTimeout(() => setCurrentPage(page), 100);
   }, []);
 
-  // Handler for opening image viewer - memoized
   const openImageViewer = useCallback(
     (image: { id: number; url: string; title: string }) => {
-      // Make sure we have a valid URL for the Next.js Image component
       const validUrl = getValidImageUrl(image.url);
-      setSelectedImage({
-        ...image,
-        url: validUrl,
-      });
+      setSelectedImage({ ...image, url: validUrl });
       document.body.style.overflow = "hidden";
     },
     [getValidImageUrl]
   );
 
-  // Handler for closing image viewer - memoized
   const closeImageViewer = useCallback(() => {
     setSelectedImage(null);
     document.body.style.overflow = "auto";
   }, []);
 
-  // Optimized handler for navigating images - reducing unnecessary recalculations
   const navigateImage = useCallback(
     (direction: "next" | "prev") => {
       if (!selectedImage) return;
-
-      // Find the current index in the full array of images
       const currentImageId = selectedImage.id;
       const currentPageIndex = pageImages.findIndex(
         (img) => img.id === currentImageId
@@ -573,36 +533,30 @@ export default function CloudinaryExplorer({
       if (currentPageIndex === -1) return;
 
       let newIndex: number;
-
       if (direction === "next") {
         if (
           currentPageIndex === pageImages.length - 1 &&
           currentPage < totalPages
         ) {
           changePage(currentPage + 1);
-          newIndex = 0; // First image of the new page
+          newIndex = 0;
         } else {
           newIndex = (currentPageIndex + 1) % pageImages.length;
         }
       } else {
         if (currentPageIndex === 0 && currentPage > 1) {
           changePage(currentPage - 1);
-          newIndex = IMAGES_PER_PAGE - 1; // Last image of previous page
+          newIndex = IMAGES_PER_PAGE - 1;
         } else {
           newIndex =
             (currentPageIndex - 1 + pageImages.length) % pageImages.length;
         }
       }
 
-      // Only proceed if we have a valid image
       if (newIndex >= 0 && newIndex < pageImages.length) {
         const newImage = pageImages[newIndex];
-        // Create a valid URL for the Next.js Image component
         const validUrl = getValidImageUrl(newImage.url);
-        setSelectedImage({
-          ...newImage,
-          url: validUrl,
-        });
+        setSelectedImage({ ...newImage, url: validUrl });
       }
     },
     [
@@ -615,18 +569,11 @@ export default function CloudinaryExplorer({
     ]
   );
 
-  // Memoize the page information to prevent unnecessary recalculations
   const pageInfo = useMemo(() => {
     if (totalPages <= 1) return null;
-
     const startItem = (currentPage - 1) * IMAGES_PER_PAGE + 1;
     const endItem = Math.min(currentPage * IMAGES_PER_PAGE, totalImagesCount);
-
-    return {
-      startItem,
-      endItem,
-      totalItems: totalImagesCount,
-    };
+    return { startItem, endItem, totalItems: totalImagesCount };
   }, [currentPage, totalImagesCount, totalPages]);
 
   return (
@@ -741,7 +688,7 @@ export default function CloudinaryExplorer({
             >
               {pageImages.map((image, index) => (
                 <ImageCard
-                  key={`${image.id}-${currentPage}`} // Add currentPage to key to force new instances on page change
+                  key={`${image.id}-${currentPage}`}
                   url={image.url}
                   alt={image.title}
                   onClick={() => openImageViewer(image)}

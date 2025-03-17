@@ -9,8 +9,9 @@ const CLOUDINARY_CLOUD_NAME = process.env
 
 // Map of folder paths to their API endpoints
 const API_ENDPOINTS: Record<string, string> = {
-  "white-emotion": "/api/gallery/white-emotion",
-  "hula-hula": "/api/gallery/hula-hula",
+  "2": "/api/gallery/white-emotion", // Use folder ID as key to match the client request
+  "3": "/api/gallery/hula-hula",
+  // Add other mappings as needed
 };
 
 // Cache for API responses to avoid repeated calls
@@ -46,6 +47,11 @@ export function getCloudinaryAlbumByPath(
   return cloudinaryAlbums.find((album) => album.folderPath === folderPath);
 }
 
+// Utility function to get API endpoint for a folder path - NEW FUNCTION
+export function getApiEndpoint(folderPath: string): string {
+  return API_ENDPOINTS[folderPath] || `/api/cloudinary/${folderPath}`;
+}
+
 // Fetches images from Cloudinary using our server API endpoints
 export async function fetchCloudinaryImages(
   folderPath: string
@@ -56,22 +62,17 @@ export async function fetchCloudinaryImages(
       return imageCache[folderPath];
     }
 
-    // Map the folder path to the corresponding API endpoint
-    let apiEndpoint = "";
-    if (folderPath === "white-emotion") {
-      apiEndpoint = API_ENDPOINTS["white-emotion"];
-    } else if (folderPath === "hula-hula") {
-      apiEndpoint = API_ENDPOINTS["hula-hula"];
-    } else {
-      // For other folder paths, try to use a direct mapping
-      apiEndpoint = API_ENDPOINTS[folderPath];
+    // Use the new getApiEndpoint function instead of conditional logic
+    const apiEndpoint = getApiEndpoint(folderPath);
 
-      if (!apiEndpoint) {
-        console.warn(
-          `No API endpoint configured for folder path: ${folderPath}. Using fallback method.`
-        );
-        return getFallbackImages(folderPath);
-      }
+    // Log the endpoint being used for debugging
+    console.log(`Using API endpoint: ${apiEndpoint} for folder: ${folderPath}`);
+
+    if (!apiEndpoint) {
+      console.warn(
+        `No API endpoint configured for folder path: ${folderPath}. Using fallback method.`
+      );
+      return getFallbackImages(folderPath);
     }
 
     // Initialize variables for pagination
@@ -86,7 +87,10 @@ export async function fetchCloudinaryImages(
         ? `${apiEndpoint}?next_cursor=${encodeURIComponent(nextCursor)}&max_results=100`
         : `${apiEndpoint}?max_results=100`;
 
-      const response: Response = await fetch(url);
+      const response: Response = await fetch(url, {
+        // Use no-store to avoid stale data
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         throw new Error(`API request failed with status: ${response.status}`);
