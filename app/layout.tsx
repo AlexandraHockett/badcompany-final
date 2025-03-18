@@ -2,13 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import {
-  geistSans,
-  geistMono,
-  audiowide,
-  generalFont,
-  zentryFont,
-} from "./fonts";
+import { helveticaNeue } from "./fonts"; // Import the primary font
 
 export const metadata: Metadata = {
   title: "BadCompany | Eventos Inovadores e Memoráveis",
@@ -55,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt"
-      className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} ${generalFont.variable} ${zentryFont.variable}`}
+      className={`${helveticaNeue.variable}`} // Apply the primary font variable
     >
       <body className="flex flex-col min-h-screen">
         <Header />

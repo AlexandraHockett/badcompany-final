@@ -161,7 +161,7 @@ export default function Equipa() {
           initial="hidden"
           animate={controls}
           variants={variants}
-          className="text-3xl sm:text-4xl md:text-5xl font-zentry text-center mb-2 text-white drop-shadow-md"
+          className="text-3xl sm:text-4xl md:text-5xl text-center mb-2 text-white drop-shadow-md"
         >
           {title}
         </motion.h1>

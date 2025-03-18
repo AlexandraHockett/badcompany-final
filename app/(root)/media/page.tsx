@@ -1,7 +1,6 @@
 "use client";
 
 import MediaCard from "@/components/MediaCard";
-import Button from "@/components/Button";
 import { mediaSections } from "@/data/mediaContent";
 import { motion } from "framer-motion";
 import { Sparkles } from "@/components/ui/sparkles";

@@ -129,7 +129,7 @@ export default function Historia() {
           initial="hidden"
           animate={titleAnimation.controls}
           variants={titleAnimation.variants}
-          className="text-4xl sm:text-5xl font-zentry text-center mb-2 text-white drop-shadow-md"
+          className="text-4xl sm:text-5xl text-center mb-2 text-white drop-shadow-md"
         >
           {title}
         </motion.h1>

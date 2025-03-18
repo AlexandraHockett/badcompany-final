@@ -131,7 +131,7 @@ export default function Sobre() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl sm:text-5xl md:text-6xl font-zentry mb-6 text-white drop-shadow-md"
+          className="text-4xl sm:text-5xl md:text-6xl mb-6 text-white drop-shadow-md"
         >
           Sobre Nós
         </motion.h1>

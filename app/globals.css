@@ -3,15 +3,19 @@
 :root {
   --background: #181616;
   --foreground: #dbd2d2;
-  /* Use a variável da Font API do Next.js */
-  --primary-font: var(--font-audiowide), sans-serif;
+  /* Use the primary font variable */
+  --primary-font: var(--font-helvetica-neue), sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--primary-font);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(
+    --primary-font
+  ); /* Set primary font as the default sans-serif font */
+  --font-mono: var(
+    --primary-font
+  ); /* Set primary font as the default monospace font */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,25 +29,10 @@ html,
 body {
   width: 100dvw;
   overflow-x: hidden;
-  font-family: var(--primary-font);
+  font-family: var(--primary-font); /* Apply primary font globally */
   background: var(--background);
   color: var(--foreground);
 }
-
-/* Remova ou comente os @font-face, pois agora estamos usando a API de fontes do Next.js */
-/* 
-@layer base {
-  @font-face {
-    font-family: "general";
-    src: url("/app/fonts/general.woff2") format("woff2");
-  }
-
-  @font-face {
-    font-family: "Zentry";
-    src: url("/app/fonts/zentry-regular.woff2") format("woff2");
-  }
-}
-*/
 
 /* Header */
 @layer utilities {
@@ -91,7 +80,7 @@ body {
   }
 
   .special-font b {
-    font-family: var(--spaceGrotesk);
+    font-family: var(--primary-font); /* Use primary font for special cases */
     font-feature-settings: "ss01" on;
   }
 }
@@ -111,8 +100,7 @@ body {
   padding: 0 !important;
 }
 
-/*Equipa*/
-
+/* Equipa */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
@@ -143,7 +131,7 @@ body {
   backface-visibility: hidden;
 }
 
-/*Missao*/
+/* Missao */
 .shadow-glow {
   box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
 }

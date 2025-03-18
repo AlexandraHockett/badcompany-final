@@ -129,7 +129,7 @@ const Contact: React.FC = () => {
           </motion.div>
 
           <motion.p
-            className="font-zentry mt-4 sm:mt-6 w-full text-4xl sm:text-5xl md:text-7xl leading-[1.1] font-bold bg-gradient-to-br from-white to-blue-200 bg-clip-text text-transparent"
+            className="mt-4 sm:mt-6 w-full text-4xl sm:text-5xl md:text-7xl leading-[1.1] font-bold bg-gradient-to-br from-white to-blue-200 bg-clip-text text-transparent"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}

@@ -182,7 +182,7 @@ export default function VisitorCounter({
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <h2 className="text-4xl sm:text-5xl font-zentry inline-block relative">
+          <h2 className="text-4xl sm:text-5xl inline-block relative">
             {title}
             <motion.span
               className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"

@@ -3,6 +3,37 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { Audiowide } from "next/font/google";
 
+export const helveticaNeue = localFont({
+  src: [
+    {
+      path: "../public/fonts/HelveticaNeue-ExtraLight.otf",
+      weight: "200",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/HelveticaNeue-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/HelveticaNeue-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/HelveticaNeue-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/HelveticaNeue-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-helvetica-neue",
+});
+
 // Fontes do Google
 export const geistSans = Geist({
   variable: "--font-geist-sans",

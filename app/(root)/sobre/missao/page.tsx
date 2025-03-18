@@ -133,7 +133,7 @@ export default function Missao() {
           initial="hidden"
           animate={controls}
           variants={variants}
-          className="text-4xl sm:text-5xl font-zentry mb-2 text-white drop-shadow-md"
+          className="text-4xl sm:text-5xl mb-2 text-white drop-shadow-md"
         >
           {title}
         </motion.h1>

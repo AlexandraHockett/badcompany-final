@@ -154,7 +154,7 @@ export default function Conquistas() {
         initial="hidden"
         animate={controls}
         variants={variants}
-        className="text-4xl sm:text-5xl font-zentry text-center mb-12 text-white drop-shadow-md"
+        className="text-4xl sm:text-5xl text-center mb-12 text-white drop-shadow-md"
       >
         {title}
       </motion.h1>

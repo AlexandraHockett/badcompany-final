@@ -165,7 +165,7 @@ const CarrosselEventos: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          <h2 className="text-4xl sm:text-5xl font-zentry relative inline-block">
+          <h2 className="text-4xl sm:text-5xl relative inline-block">
             Próximos Eventos
             <motion.span
               className="absolute -bottom-3 left-0 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
@@ -229,7 +229,7 @@ const CarrosselEventos: React.FC = () => {
                       </motion.div>
 
                       <motion.h3
-                        className="text-4xl sm:text-5xl md:text-6xl font-bold mt-4 font-zentry"
+                        className="text-4xl sm:text-5xl md:text-6xl font-bold mt-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4, duration: 0.6 }}
