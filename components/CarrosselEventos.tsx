@@ -19,14 +19,14 @@ const eventos: Evento[] = [
     id: 1,
     nome: "BCLANDIA 25",
     data: "2025-03-03T23:59:00",
-    imagem: "/img/bclandia.jpg",
+    imagem: "/images/eventos/bclandia.jpg",
     link: "https://3cket.com/event/bclandia-25/",
   },
   {
     id: 2,
     nome: "BCLANDIA 25",
     data: "2025-03-03T23:59:00",
-    imagem: "/img/bclandia.jpg",
+    imagem: "/images/eventos/bclandia.jpg",
     link: "https://3cket.com/event/bclandia-25/",
   },
 ];

@@ -2,7 +2,7 @@
 
 import EventCard from "@/components/EventCard";
 import Button from "@/components/Button";
-import { eventSections } from "@/data/eventsContent";
+import { eventSections } from "@/data/eventos/eventsContent";
 import { motion } from "framer-motion";
 import { Sparkles } from "@/components/ui/sparkles";
 

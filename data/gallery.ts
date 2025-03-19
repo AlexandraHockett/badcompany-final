@@ -40,7 +40,7 @@ export const cloudinaryGalleryCollections: GalleryCollection[] = [
     id: 2,
     title: "White Emotion 2024",
     description: "Fotos do evento White Emotion de 2024.",
-    coverImage: "/img/bclandia.jpg",
+    coverImage: "/images/eventos/bclandia.jpg",
     coverImages: [
       "https://res.cloudinary.com/dsx99t2vn/image/upload/v1741830497/white-motion-24_105_ehih6d.jpg",
       "https://res.cloudinary.com/dsx99t2vn/image/upload/v1741830708/white-motion-24_160_esihet.jpg",
@@ -55,7 +55,7 @@ export const cloudinaryGalleryCollections: GalleryCollection[] = [
     id: 3,
     title: "Hula Hula 2023",
     description: "Fotos do evento Hula Hula de 2023.",
-    coverImage: "/img/bclandia.jpg",
+    coverImage: "/images/eventos/bclandia.jpg",
     coverImages: [
       "https://res.cloudinary.com/dsx99t2vn/image/upload/v1741830056/hula-hula-23_547_dviua3.jpg",
       "https://res.cloudinary.com/dsx99t2vn/image/upload/v1741830003/hula-hula-23_588_znnxjz.jpg",
@@ -80,37 +80,37 @@ export const cloudinaryImages: CloudinaryImage[] = [
   {
     id: 1,
     title: "Evento 2023",
-    url: "/img/bclandia.jpg",
+    url: "/images/eventos/bclandia.jpg",
     date: "2023-08-15",
   },
   {
     id: 2,
     title: "Backstage",
-    url: "/img/bclandia.jpg",
+    url: "/images/eventos/bclandia.jpg",
     date: "2023-07-22",
   },
   {
     id: 3,
     title: "Palco Principal",
-    url: "/img/bclandia.jpg",
+    url: "/images/eventos/bclandia.jpg",
     date: "2023-06-30",
   },
   {
     id: 4,
     title: "DJ Set",
-    url: "/img/bclandia.jpg",
+    url: "/images/eventos/bclandia.jpg",
     date: "2023-05-15",
   },
   {
     id: 5,
     title: "Público",
-    url: "/img/bclandia.jpg",
+    url: "/images/eventos/bclandia.jpg",
     date: "2023-04-20",
   },
   {
     id: 6,
     title: "Equipe BadCompany",
-    url: "/img/bclandia.jpg",
+    url: "/images/eventos/bclandia.jpg",
     date: "2023-03-15",
   },
 ];

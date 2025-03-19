@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Button from "@/components/Button";
 import Image from "next/image";
-import { events, Event, LocationEntry } from "@/data/eventsContent";
+import { events, Event, LocationEntry } from "@/data/eventos/eventsContent";
 
 // Dynamically import InteractiveMap with SSR disabled
 const InteractiveMap = dynamic(() => import("@/components/InteractiveMap"), {

@@ -5,7 +5,7 @@ import Button from "@/components/Button";
 import Countdown from "@/components/Countdown";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { events } from "@/data/eventsContent";
+import { events } from "@/data/eventos/eventsContent";
 
 // Filtrar apenas eventos próximos
 const upcomingEvents = events.filter((event) => event.status === "upcoming");

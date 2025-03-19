@@ -1,8 +1,16 @@
 // Dados das seções de mídia
 export const mediaSections = [
-  { title: "Podcasts", slug: "podcasts", image: "/img/bclandia.jpg" },
-  { title: "Notícias", slug: "noticias", image: "/img/bclandia.jpg" },
-  { title: "Galeria", slug: "galeria", image: "/img/bclandia.jpg" },
+  {
+    title: "Podcasts",
+    slug: "podcasts",
+    image: "/images/eventos/bclandia.jpg",
+  },
+  {
+    title: "Notícias",
+    slug: "noticias",
+    image: "/images/eventos/bclandia.jpg",
+  },
+  { title: "Galeria", slug: "galeria", image: "/images/eventos/bclandia.jpg" },
 ];
 
 // Interface para Podcast
@@ -30,7 +38,7 @@ export const podcastEpisodes: Podcast[] = [
       'São conhecidos por organizar festas por todo o país (Portugal). O projecto em ascensão partiu de dois jovens Anyfá e Sanger que dão a cara pela Badcompany "má vida", eles que são os responsáveis por aquecer várias noites de Lisboa e não só, causando por onde passam um enorme alvoroço, a chamada família da "má vida". A chave do sucesso passa por fazer com que os clientes sintam-se em casa, tal como uma família.',
     date: "2015-08-10",
     videoUrl: "https://www.youtube.com/embed/Kh6vbIWFXzU",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["Rosa De Sousa"], // Autor como host
     guests: ["Anyfá", "Sanger"], // Pessoas mencionadas no conteúdo
     topics: ["entrevista", "evento", "lisboa"],
@@ -45,7 +53,7 @@ export const podcastEpisodes: Podcast[] = [
       "Anyfá, o homem de sorriso contagiante! Obrigada por nos ter dado a oportunidade de entrevistar uma pessoa como ele, alguém que fez também da juventude momentos incríveis. Falámos imenso, o Anyfá deu a conhecer os projetos de verão, falou da sua equipa, da sua família e de como se dá com as mães das suas crianças, do apoio que dá aos novos artistas. O Anyfá também deu-nos vários conselhos e mostrou o seu orgulho com o nosso projeto. Falámos de haters também e das suas festas mais populares e muito mais!",
     date: "2022-08-29",
     videoUrl: "https://www.youtube.com/embed/jmh_17spfpU",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["Equipa BadCompany"], // Autor como host
     guests: ["Anyfá"], // Pessoa entrevistada
     topics: ["entrevista", "anyfa", "projetos"],
@@ -60,7 +68,7 @@ export const podcastEpisodes: Podcast[] = [
       'Anyfa e Mc Suxexo estiveram à conversa com Miguel Paraíso e Mangope no programa "Na corda bamba" da RDP África. Uma entrevista reveladora onde discutiram os próximos passos da BadCompany e projetos futuros.',
     date: "2023-12-12",
     videoUrl: "https://www.youtube.com/embed/7LlDA1CLH48",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["Miguel Paraíso", "Mangope"], // Apresentadores do programa
     guests: ["Anyfa", "Mc Suxexo"], // Convidados da entrevista
     topics: ["rádio", "entrevista", "anyfa", "mc suxexo"],
@@ -75,7 +83,7 @@ export const podcastEpisodes: Podcast[] = [
       "O BC Fest 2023 foi um marco na história da BadCompany, reunindo milhares de pessoas para celebrar música e cultura. Com mais de 20 artistas nacionais e internacionais distribuídos por 3 palcos, o evento superou todas as expectativas e consolidou-se como um dos maiores festivais urbanos de Portugal.",
     date: "2023-10-01",
     videoUrl: "https://www.youtube.com/embed/-P2oVT0RVe4",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["Equipa BadCompany"], // Autor como host
     topics: ["festival", "evento", "música"],
     duration: "0:00:00", // Duração desconhecida, placeholder
@@ -108,8 +116,8 @@ export const newsArticles: NewsArticle[] = [
     id: 1,
     title: "Badcompany não é uma organização, mas sim uma família",
     slug: "badcompany-nao-e-organizacao-mas-familia",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2015-08-10",
     author: "Rosa De Sousa",
     excerpt:
@@ -125,8 +133,8 @@ export const newsArticles: NewsArticle[] = [
     id: 2,
     title: "Entrevista com Anyfá - O homem de sorriso contagiante",
     slug: "entrevista-anyfa-homem-sorriso-contagiante",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2022-08-29",
     author: "Equipa BadCompany",
     excerpt:
@@ -142,8 +150,8 @@ export const newsArticles: NewsArticle[] = [
     id: 3,
     title: "Anyfa e Mc Suxexo na RDP África",
     slug: "anyfa-mc-suxexo-rdp-africa",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2023-12-12",
     author: "RDP África",
     excerpt:
@@ -159,8 +167,8 @@ export const newsArticles: NewsArticle[] = [
     id: 4,
     title: "BC Fest 2023: Um Sucesso Absoluto",
     slug: "bc-fest-2023-sucesso-absoluto",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2023-10-01",
     author: "Equipa BadCompany",
     excerpt:

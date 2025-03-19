@@ -12,7 +12,7 @@ export default function AlbumPage() {
   const coverImages = useMemo(
     () =>
       myAlbumCollection?.coverImages || [
-        myAlbumCollection?.coverImage || "/img/bclandia.jpg",
+        myAlbumCollection?.coverImage || "/images/eventos/bclandia.jpg",
       ],
     [myAlbumCollection]
   );

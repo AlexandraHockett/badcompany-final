@@ -21,7 +21,7 @@ export const products: Product[] = [
     id: 1,
     title: "T-Shirt BadCompany",
     price: "25.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Merchandising",
     description:
       "T-shirt oficial BadCompany em algodão premium com estampa exclusiva.",
@@ -37,7 +37,7 @@ export const products: Product[] = [
     id: 2,
     title: "Boné BadCompany",
     price: "15.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Merchandising",
     description: "Boné ajustável com logo bordado BadCompany.",
     available: true,
@@ -48,7 +48,7 @@ export const products: Product[] = [
     id: 3,
     title: "Hoodie BadCompany",
     price: "45.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Merchandising",
     description: "Hoodie quente e confortável com capuz e logo BadCompany.",
     available: true,
@@ -63,7 +63,7 @@ export const products: Product[] = [
     id: 8,
     title: "Máscara Logo BC",
     price: "10.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Merchandising",
     description: "Máscara facial reutilizável com o logo da BadCompany.",
     available: true,
@@ -74,7 +74,7 @@ export const products: Product[] = [
     id: 4,
     title: "Vinil Omah Lay",
     price: "50.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Exclusives",
     description:
       "Vinil exclusivo com autógrafo do artista Omah Lay. Edição limitada.",
@@ -86,7 +86,7 @@ export const products: Product[] = [
     id: 5,
     title: "Poster Nelson Freitas",
     price: "30.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Exclusives",
     description:
       "Poster exclusivo da tour de Nelson Freitas, formato A2 em papel premium.",
@@ -97,7 +97,7 @@ export const products: Product[] = [
     id: 9,
     title: "Coletânea BCLândia 2022",
     price: "35.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Exclusives",
     description:
       "CD com as melhores músicas do festival BCLândia 2022. Edição limitada.",
@@ -109,7 +109,7 @@ export const products: Product[] = [
     id: 6,
     title: "BC Fest 2023",
     price: "30.00€",
-    image: "/img/bclandia.jpg", // Update to a ticket-specific image if available
+    image: "/images/eventos/bclandia.jpg", // Update to a ticket-specific image if available
     category: "Tickets",
     description:
       "Bilhete para o BC Fest 2023, o maior festival de música alternativa do ano.",
@@ -123,7 +123,7 @@ export const products: Product[] = [
     id: 7,
     title: "Monsanto Fest 2023",
     price: "20.00€",
-    image: "/img/bclandia.jpg", // Update to a ticket-specific image if available
+    image: "/images/eventos/bclandia.jpg", // Update to a ticket-specific image if available
     category: "Tickets",
     description:
       "Entrada para o festival de verão no Parque Monsanto, com várias bandas nacionais.",
@@ -136,7 +136,7 @@ export const products: Product[] = [
     id: 10,
     title: "White Emotion Party",
     price: "25.00€",
-    image: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
     category: "Tickets",
     description:
       "A festa mais elegante do ano, onde todos vestem branco. Open bar incluído.",

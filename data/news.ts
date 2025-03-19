@@ -1,4 +1,4 @@
-import { NewsArticle } from '@/types/media';
+import { NewsArticle } from "@/types/media";
 
 // Dados de Notícias
 export const newsArticles: NewsArticle[] = [
@@ -6,8 +6,8 @@ export const newsArticles: NewsArticle[] = [
     id: 1,
     title: "Badcompany não é uma organização, mas sim uma família",
     slug: "badcompany-nao-e-organizacao-mas-familia",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2015-08-10",
     author: "Rosa De Sousa",
     excerpt:
@@ -23,8 +23,8 @@ export const newsArticles: NewsArticle[] = [
     id: 2,
     title: "Entrevista com Anyfá - O homem de sorriso contagiante",
     slug: "entrevista-anyfa-homem-sorriso-contagiante",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2022-08-29",
     author: "Equipa BadCompany",
     excerpt:
@@ -40,8 +40,8 @@ export const newsArticles: NewsArticle[] = [
     id: 3,
     title: "Anyfa e Mc Suxexo na RDP África",
     slug: "anyfa-mc-suxexo-rdp-africa",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2023-12-12",
     author: "RDP África",
     excerpt:
@@ -57,8 +57,8 @@ export const newsArticles: NewsArticle[] = [
     id: 4,
     title: "BC Fest 2023: Um Sucesso Absoluto",
     slug: "bc-fest-2023-sucesso-absoluto",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2023-10-01",
     author: "Equipa BadCompany",
     excerpt:
@@ -74,8 +74,8 @@ export const newsArticles: NewsArticle[] = [
     id: 5,
     title: "Tendências de Música Africana em 2023",
     slug: "tendencias-musica-africana-2023",
-    image: "/img/bclandia.jpg",
-    thumbnailUrl: "/img/bclandia.jpg",
+    image: "/images/eventos/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     date: "2023-09-25",
     author: "DJ Kaze",
     excerpt:

@@ -8,7 +8,7 @@ import {
   privateEventsInfo,
   privateEventTypes,
   eventExamples,
-} from "@/data/eventsContent";
+} from "@/data/eventos/eventsContent";
 
 export default function EventosPrivados() {
   const [isLoaded, setIsLoaded] = useState(false);

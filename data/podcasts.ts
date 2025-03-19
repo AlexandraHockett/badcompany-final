@@ -1,4 +1,4 @@
-import { Podcast } from '@/types/media';
+import { Podcast } from "@/types/media";
 
 // Dados dos Podcasts
 export const podcastEpisodes: Podcast[] = [
@@ -9,7 +9,7 @@ export const podcastEpisodes: Podcast[] = [
       "Neste episódio exploramos as tendências emergentes da música eletrônica em Portugal, desde o techno underground até os eventos mainstream. Conversamos com DJs e produtores sobre o que podemos esperar para o futuro da cena.",
     date: "2024-02-25",
     videoUrl: "https://www.youtube.com/embed/C0DPdy98e4c",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["DJ Kaze", "Maria Silva"],
     guests: ["Pedro Vasconcelos", "Ana Flores"],
     topics: ["música eletrônica", "techno", "portugal", "tendências"],
@@ -24,7 +24,7 @@ export const podcastEpisodes: Podcast[] = [
       "Uma conversa fascinante sobre como o Drum & Bass se desenvolveu em Portugal nas últimas duas décadas. Com convidados especiais que ajudaram a moldar a cena, discutimos a evolução sonora e cultural deste gênero no país.",
     date: "2024-03-10",
     videoUrl: "https://www.youtube.com/embed/5qap5aO4i9A",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["DJ Kaze", "Maria Silva"],
     guests: ["Carlos Mendes", "Beatriz Santos"],
     topics: ["drum & bass", "jungle", "portugal", "história musical"],
@@ -39,7 +39,7 @@ export const podcastEpisodes: Podcast[] = [
       "Exploramos as raízes africanas de muitos estilos de música eletrônica contemporânea e como produtores de todo o mundo estão incorporando elementos de afrobeat, kuduro e amapiano em suas produções.",
     date: "2024-03-25",
     videoUrl: "https://www.youtube.com/embed/ceqgwo7U28Y",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["DJ Kaze", "Maria Silva"],
     guests: ["DJ Marfox", "Nídia Minaj"],
     topics: [
@@ -60,7 +60,7 @@ export const podcastEpisodes: Podcast[] = [
       "Como os festivais e eventos de música podem se tornar mais sustentáveis? Neste episódio, conversamos com organizadores e especialistas sobre práticas ecológicas e como reduzir o impacto ambiental sem comprometer a experiência.",
     date: "2024-04-05",
     videoUrl: "https://www.youtube.com/embed/21qNxnCS8WU",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["DJ Kaze", "Maria Silva"],
     guests: ["João Carvalho", "Sofia Mendonça"],
     topics: ["sustentabilidade", "festivais", "ecologia", "eventos"],
@@ -75,7 +75,7 @@ export const podcastEpisodes: Podcast[] = [
       "Analisamos como a tecnologia democratizou a produção musical, permitindo que artistas criem música profissional em casa. Do equipamento essencial às melhores práticas, este é um guia para quem quer começar no mundo da produção.",
     date: "2024-04-20",
     videoUrl: "https://www.youtube.com/embed/1ZYbU82GVz4",
-    thumbnailUrl: "/img/bclandia.jpg",
+    thumbnailUrl: "/images/eventos/bclandia.jpg",
     hosts: ["DJ Kaze", "Maria Silva"],
     guests: ["Miguel Teixeira", "Carolina Duarte"],
     topics: [
