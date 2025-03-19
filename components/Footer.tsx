@@ -183,7 +183,7 @@ const Footer = ({ className = "" }: FooterProps) => {
           </div>
 
           <div
-            className="w-full md:w-auto flex flex-col items-center md:items-end pt-4 md:pt-0"
+            className="w-full md:w-auto flex flex-col items-center md:items-end pt-4 md:pt-0 font-audiowide"
             style={
               isClient
                 ? {

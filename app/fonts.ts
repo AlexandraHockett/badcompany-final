@@ -1,7 +1,5 @@
-// app/fonts.ts
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
-import { Audiowide } from "next/font/google";
 
 export const helveticaNeue = localFont({
   src: [
@@ -43,13 +41,6 @@ export const geistSans = Geist({
 export const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-
-export const audiowide = Audiowide({
-  weight: "400",
-  variable: "--font-audiowide",
-  subsets: ["latin"],
-  display: "swap",
 });
 
 // Fontes locais

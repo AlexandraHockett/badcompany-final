@@ -1,3 +1,7 @@
+/* First import Google Font */
+@import url("https://fonts.googleapis.com/css2?family=Audiowide&display=swap");
+
+/* Then import Tailwind */
 @import "tailwindcss";
 
 :root {
@@ -32,6 +36,11 @@ body {
   font-family: var(--primary-font); /* Apply primary font globally */
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Add Audiowide font class */
+.font-audiowide {
+  font-family: "Audiowide", cursive;
 }
 
 /* Header */

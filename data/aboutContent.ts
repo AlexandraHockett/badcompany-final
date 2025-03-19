@@ -1,3 +1,5 @@
+import image from "next/image";
+
 export interface HistoriaContent {
   title: string;
   timeline: {
@@ -86,9 +88,30 @@ export const aboutContent: AboutContentMap = {
       },
       {
         year: "2021",
+        title: "Só no Suculento",
+        description:
+          "Com foco numa variedade suculenta de artistas, o evento mistura diferentes ritmos a diversas regiões do país, com muita diversão.",
+        image: "/img/bclandia.jpg",
+      },
+      {
+        year: "2021",
+        title: "WHITE EMOTION",
+        description:
+          "O branco, cor predominante nas roupas dos convidados, é o cartão verde para a porta de entrada. Simboliza pureza, exclusividade e a intensidade das emoções vividas. Criámos um ambiente imersivo e exclusivo, a todos os presentes.",
+        image: "/img/bclandia.jpg",
+      },
+      {
+        year: "2021",
         title: "Bissau Xperience",
         description:
           "Expandimos horizontes para a Guiné-Bissau com uma experiência imersiva de seis meses na Guiné-Bissau, conectando a nossa audiência europeia às suas raízes culturais.",
+        image: "/img/bclandia.jpg",
+      },
+      {
+        year: "2021",
+        title: "A Casa Assombrada",
+        description:
+          "Nome intitulado à nossa festa de Halloween, uma festa que transporta os convidados para um ambiente cheio de mistério e suspense. Com decoração macabra e efeitos especiais que leva o público a viajar.",
         image: "/img/bclandia.jpg",
       },
       {
@@ -99,10 +122,24 @@ export const aboutContent: AboutContentMap = {
         image: "/img/bclandia.jpg",
       },
       {
+        year: "2022",
+        title: "Monsanto BC Fest",
+        description:
+          "Realizado em Monsanto, localizado em Lisboa, este é um conceito ao ar livre com música ao vivo. Contou com a presença de Omah Lay, um cantor, compositor e produtor musical nigeriano que ganhou destaque internacional com os seus singles “Soso”, “Attention” e “Understand”.",
+        image: "/img/bclandia.jpg",
+      },
+      {
         year: "2023",
         title: " “The Indigo Tour”, Londres",
         description:
           "Conquistámos o icónico espaço 02 em Londres, elevando as nossas produções ao patamar internacional e reafirmando o nosso compromisso com a excelência.",
+        image: "/img/bclandia.jpg",
+      },
+      {
+        year: "2025",
+        title: "BCLANDIA",
+        description:
+          "Uma experiência carnavalesca, onde a criatividade e os disfarces dominam a noite. Os convidados mascaram-se a rigor e são premiados pelos melhores e mais originais disfarces, num ambiente repleto de música e diversão.",
         image: "/img/bclandia.jpg",
       },
     ],
