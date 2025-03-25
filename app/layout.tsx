@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { helveticaNeue } from "./fonts"; // Import the primary font
+import NewsletterModal from "@/components/NewsletterModal";
 
 export const metadata: Metadata = {
   title: "BadCompany | Eventos Inovadores e Memoráveis",
@@ -53,7 +54,10 @@ export default function RootLayout({
     >
       <body className="flex flex-col min-h-screen">
         <Header />
-        <main>{children}</main>
+        <main>
+          {children}
+          <NewsletterModal />
+        </main>
         <Footer />
       </body>
     </html>

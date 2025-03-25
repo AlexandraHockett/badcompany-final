@@ -6,6 +6,7 @@ import Countdown from "@/components/Countdown";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { events } from "@/data/eventos/eventsContent";
+import Newsletter from "@/components/Newsletter";
 
 // Filtrar apenas eventos próximos
 const upcomingEvents = events.filter((event) => event.status === "upcoming");
@@ -274,6 +275,13 @@ export default function ProximosEventos() {
           </div>
         )}
       </motion.div>
+      <div className="max-w-5xl mx-auto px-4 mt-16">
+        <Newsletter
+          title="Não Perca os Próximos Eventos"
+          subtitle="Inscreva-se para ser o primeiro a saber sobre novos eventos e ter acesso à venda prioritária de ingressos."
+          className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/20"
+        />
+      </div>
     </section>
   );
 }

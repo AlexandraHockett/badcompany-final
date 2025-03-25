@@ -14,7 +14,7 @@ import {
   sortProducts,
 } from "@/data/products";
 import FeaturedProduct from "@/components/FeaturedProduct";
-import NewsletterSubscription from "@/components/NewsletterSubscription";
+import Newsletter from "@/components/Newsletter";
 
 export default function LojaPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -297,7 +297,11 @@ export default function LojaPage() {
         )}
 
         {/* Newsletter signup */}
-        <NewsletterSubscription />
+        <Newsletter
+          title="Fique por dentro das novidades"
+          subtitle="Subscreva a nossa newsletter para receber em primeira mão informações sobre lançamentos de produtos exclusivos e promoções especiais."
+          className="mb-16"
+        />
       </main>
 
       {/* Floating Cart */}

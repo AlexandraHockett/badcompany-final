@@ -31,12 +31,43 @@ const pastEvents: Event[] = [
     },
   },
   {
+    id: "bclandia-2023",
+    title: "BCLândia 2023",
+    description:
+      "A maior edição do festival com mais de 40 artistas em três dias de evento, criando experiências inesquecíveis.",
+    longDescription:
+      "A edição 2023 do famoso festival BCLândia trouxe mais de 40 artistas em 3 dias de evento, com público recorde e experiências inesquecíveis.",
+    date: "2023-06-20T16:00:00",
+    time: "16:00 - 04:00",
+    location: "MEO Arena",
+    address: "Rossio dos Olivais, 1990-231 Lisboa",
+    image: "/images/eventos/bclandia.jpg",
+    video: "/videos/video-3.mp4",
+    gallery: [
+      "/images/eventos/bclandia.jpg",
+      "/images/eventos/bclandia.jpg",
+      "/images/eventos/bclandia.jpg",
+    ],
+    price: "45€ - 90€",
+    status: "past",
+    categories: ["Festivais", "BCFest"],
+    tags: ["festival", "verão"],
+    coordinates: {
+      lat: 38.7677,
+      lng: -9.0941,
+    },
+    organizador: {
+      name: "BadCompany",
+      contact: "eventos@badcompany.pt",
+    },
+  },
+  {
     id: "monsanto-fest-2022",
     title: "Monsanto Fest",
     description:
-      "Festival realizado no parque Monsanto, um dos eventos mais populares da BadCompany com música ao ar livre.",
-    longDescription:
       "Festival realizado no parque Monsanto, um dos eventos mais populares da BadCompany.",
+    longDescription:
+      "Festival realizado no parque Monsanto, um dos eventos mais populares da BadCompany com música ao ar livre.",
     date: "2022-08-15T18:00:00",
     location: "Parque Monsanto, Lisboa",
     address: "Parque Florestal de Monsanto, Lisboa",
@@ -135,45 +166,15 @@ const pastEvents: Event[] = [
     },
     international: true,
   },
+
   {
-    id: "bclandia-2023",
-    title: "BCLândia 2023",
+    id: "bc-best-21",
+    title: "BCBEST 2021",
     description:
-      "A maior edição do festival com mais de 40 artistas em três dias de evento, criando experiências inesquecíveis.",
+      "O melhor festival em Portugal em tempos de pandemia",
     longDescription:
-      "A edição 2023 do famoso festival BCLândia trouxe mais de 40 artistas em 3 dias de evento, com público recorde e experiências inesquecíveis.",
-    date: "2023-06-20T16:00:00",
-    time: "16:00 - 04:00",
-    location: "MEO Arena",
-    address: "Rossio dos Olivais, 1990-231 Lisboa",
-    image: "/images/eventos/bclandia.jpg",
-    video: "/videos/video-3.mp4",
-    gallery: [
-      "/images/eventos/bclandia.jpg",
-      "/images/eventos/bclandia.jpg",
-      "/images/eventos/bclandia.jpg",
-    ],
-    price: "45€ - 90€",
-    status: "past",
-    categories: ["Festivais", "BCFest"],
-    tags: ["festival", "verão"],
-    coordinates: {
-      lat: 38.7677,
-      lng: -9.0941,
-    },
-    organizador: {
-      name: "BadCompany",
-      contact: "eventos@badcompany.pt",
-    },
-  },
-  {
-    id: "bclandia-2023-bis",
-    title: "BCLândia 2023",
-    description:
-      "A edição histórica que bateu recordes de público com os principais artistas nacionais e internacionais reunidos em Lisboa.",
-    longDescription:
-      "A edição 2023 do famoso festival BCLândia trouxe mais de 40 artistas em 3 dias de evento, com público recorde e experiências inesquecíveis.",
-    date: "2023-06-20T16:00:00",
+      "O melhor festival em Portugal em tempos de pandemia",
+    date: "2021-08-28T16:00:00",
     time: "16:00 - 04:00",
     location: "MEO Arena",
     address: "Rossio dos Olivais, 1990-231 Lisboa",
@@ -194,7 +195,7 @@ const pastEvents: Event[] = [
   },
   {
     id: "badcompany-fest-2019",
-    title: "BadCompany Fest",
+    title: "BadCompany Fest 2019",
     description:
       "Uma das maiores festas de Afro Music em Lisboa, com Soraia Ramos, Força Suprema, Scró Q Cuia e muitos outros artistas.",
     longDescription:

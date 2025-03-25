@@ -3,6 +3,7 @@ import { FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa";
 import { ReactElement, useEffect, useState } from "react";
 import Button from "./Button";
 import Link from "next/link";
+import Newsletter from "./Newsletter";
 
 interface SocialLink {
   href: string;
@@ -160,6 +161,15 @@ const Footer = ({ className = "" }: FooterProps) => {
             href="/eventos/proximos"
             leftIcon={<span>🎉</span>}
             containerClass="bg-gray-800 hover:bg-purple-600 z-10"
+          />
+        </div>
+        <div className="border-t border-gray-800 pt-6 my-8">
+          <Newsletter
+            variant="minimal"
+            title="Fique por dentro"
+            subtitle="Receba novidades e conteúdo exclusivo"
+            position="left"
+            className="max-w-lg"
           />
         </div>
 

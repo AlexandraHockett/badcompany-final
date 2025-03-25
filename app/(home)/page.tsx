@@ -1,6 +1,7 @@
 import CarrosselEventos from "@/components/CarrosselEventos";
 import Contact from "@/components/Contact";
 import Hero from "@/components/Hero";
+import Newsletter from "@/components/Newsletter";
 import SpotifyPlaylist from "@/components/SpotifyPlaylist";
 import VisitorCounter from "@/components/VisitorCounter";
 
@@ -13,6 +14,11 @@ export default function Home() {
       <VisitorCounter title="Nossa Comunidade" />
       <CarrosselEventos />
       <SpotifyPlaylist playlistId={playlistId} />
+      <Newsletter
+        variant="expanded"
+        title="Seja o Primeiro a Saber"
+        subtitle="Inscreva-se na nossa newsletter e receba em primeira mão informações exclusivas sobre novos eventos, pré-vendas e conteúdos da BadCompany."
+      />
       <Contact />
     </main>
   );

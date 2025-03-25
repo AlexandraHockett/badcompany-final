@@ -2,29 +2,20 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // Função para tentar operações do Prisma com retentativa
-async function withRetry<T>(
-  operation: () => Promise<T>,
-  maxRetries = 3,
-  delayMs = 500
-): Promise<T> {
-  let lastError: any;
-
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 5): Promise<T> {
+  let lastError;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await operation();
+      return await fn();
     } catch (error) {
       console.log(`Tentativa ${attempt} falhou:`, error);
       lastError = error;
 
-      // Espera um pouco antes de tentar novamente
-      // Aumenta o tempo de espera a cada tentativa (backoff exponencial)
-      if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
-      }
+      // Backoff exponencial (espera cada vez mais entre tentativas)
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-
-  // Se todas as tentativas falharem, lança o último erro
   throw lastError;
 }
 

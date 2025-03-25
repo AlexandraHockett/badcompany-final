@@ -1,17 +1,105 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // Mantemos mais simples para evitar erros
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Estas opções ajustam o comportamento de conexão
+  directUrl = env("DATABASE_URL")
+  
+  // Aumentar o tempo limite da conexão não é possível diretamente no schema,
+  // mas o Prisma usa valores razoáveis por padrão
 }
 
 model Visitor {
-  visitorId   String   @id
-  userAgent   String
-  firstVisit  DateTime
-  lastVisit   DateTime
-  visitCount  Int      @default(1)
+  visitorId    String   @id
+  userAgent    String
+  firstVisit   DateTime
+  lastVisit    DateTime
+  visitCount   Int      @default(1)
+  subscriberId Int?     // Adicione esta linha
+  subscriber   NewsletterSubscriber? @relation(fields: [subscriberId], references: [id])
+}
+
+model NewsletterSubscriber {
+  id           Int      @id @default(autoincrement())
+  email             String                        @unique
+  name              String?
+  source            String?
+  active            Boolean                       @default(true)
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+  preferences       Json?
+  lastEmailSentAt   DateTime?
+  emailsSent        Int                           @default(0)
+  unsubscribeReason String?
+  unsubscribedAt    DateTime?
+  campaigns         NewsletterCampaignRecipient[]
+  linkClicks        NewsletterLinkClick[]
+  unsubscribes      NewsletterUnsubscribe[]
+  visitors          Visitor[]
+
+  @@index([email])
+  @@index([active])
+}
+
+model NewsletterCampaign {
+  id              Int                           @id @default(autoincrement())
+  title           String
+  subject         String
+  content         String
+  sentAt          DateTime?
+  status          String                        @default("draft")
+  totalRecipients Int                           @default(0)
+  opened          Int                           @default(0)
+  clicked         Int                           @default(0)
+  createdAt       DateTime                      @default(now())
+  updatedAt       DateTime                      @updatedAt
+  scheduledFor    DateTime?
+  recipients      NewsletterCampaignRecipient[]
+  linkClicks      NewsletterLinkClick[]
+  unsubscribes    NewsletterUnsubscribe[]
+}
+
+model NewsletterCampaignRecipient {
+  id           Int                  @id @default(autoincrement())
+  campaignId   Int
+  subscriberId Int
+  sentAt       DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  campaign     NewsletterCampaign   @relation(fields: [campaignId], references: [id])
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@unique([campaignId, subscriberId])
+  @@index([campaignId])
+  @@index([subscriberId])
+}
+
+model NewsletterUnsubscribe {
+  id             Int                  @id @default(autoincrement())
+  subscriberId   Int
+  campaignId     Int?
+  reason         String?
+  unsubscribedAt DateTime             @default(now())
+  campaign       NewsletterCampaign?  @relation(fields: [campaignId], references: [id])
+  subscriber     NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@index([subscriberId])
+  @@index([campaignId])
+}
+
+model NewsletterLinkClick {
+  id           Int                  @id @default(autoincrement())
+  campaignId   Int
+  subscriberId Int
+  url          String
+  clickedAt    DateTime             @default(now())
+  campaign     NewsletterCampaign   @relation(fields: [campaignId], references: [id])
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+
+  @@index([campaignId])
+  @@index([subscriberId])
 }

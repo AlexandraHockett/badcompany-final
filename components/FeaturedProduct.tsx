@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react"; // Added useCallback import
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { BaseProduct } from "@/types/types";
-import { div } from "framer-motion/client";
+// Removed unnecessary div import from framer-motion/client
 
 interface FeaturedProductProps {
   products: any[]; // Using any for simplicity, should be properly typed in a real app
@@ -23,18 +23,7 @@ export default function FeaturedProduct({
   const currentProduct = products[currentIndex];
 
   // Autoplay functionality
-  useEffect(() => {
-    if (!autoplay || products.length <= 1 || isTransitioning) return;
-
-    const timer = setTimeout(() => {
-      handleNext();
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [currentIndex, autoplay, products.length, isTransitioning]);
-
-  // Navigate to next product
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (isTransitioning) return;
 
     setIsTransitioning(true);
@@ -44,10 +33,21 @@ export default function FeaturedProduct({
     setTimeout(() => {
       setIsTransitioning(false);
     }, 600);
-  };
+  }, [isTransitioning, products.length]);
+
+  // Then use it in your useEffect
+  useEffect(() => {
+    if (!autoplay || products.length <= 1 || isTransitioning) return;
+
+    const timer = setTimeout(() => {
+      handleNext();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, autoplay, products.length, isTransitioning, handleNext]);
 
   // Navigate to previous product
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (isTransitioning) return;
 
     setIsTransitioning(true);
@@ -57,7 +57,7 @@ export default function FeaturedProduct({
     setTimeout(() => {
       setIsTransitioning(false);
     }, 600);
-  };
+  }, [isTransitioning, products.length]);
 
   // If no featured products, don't render anything
   if (products.length === 0) return null;
