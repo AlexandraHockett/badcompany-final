@@ -18,6 +18,8 @@ const Hero = () => {
   // Aumentado para 9 vídeos
   const totalVideos = 9;
   const nextVideoRef = useRef<HTMLVideoElement>(null);
+  const badRef = useRef<HTMLDivElement | null>(null);
+  const companyRef = useRef<HTMLDivElement | null>(null);
   const videoFrameRef = useRef<HTMLDivElement | null>(null);
   const loadedVideoSetRef = useRef<Set<string>>(new Set());
 
@@ -140,6 +142,45 @@ const Hero = () => {
     });
   }, []);
 
+  // Text glitch animation
+  useEffect(() => {
+    const badElement = badRef.current;
+    const companyElement = companyRef.current;
+
+    if (badElement && companyElement) {
+      // Initial animation
+      gsap.fromTo(
+        badElement,
+        { opacity: 0, x: -50, y: -50, scale: 0.8 },
+        { opacity: 1, x: 0, y: 0, scale: 1, duration: 1, ease: "power2.out" }
+      );
+
+      gsap.fromTo(
+        companyElement,
+        { opacity: 0, x: 50, y: 50, scale: 0.8 },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power2.out",
+          delay: 0.5,
+        }
+      );
+    }
+
+    // Automatic glitch effect with reduced frequency
+    const glitchLoop = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        glitchEffect(badRef.current);
+        glitchEffect(companyRef.current);
+      }
+    }, 5000);
+
+    return () => clearInterval(glitchLoop);
+  }, [glitchEffect]);
+
   // Preload all videos on component mount
   useEffect(() => {
     const preloadVideos = async () => {
@@ -165,7 +206,7 @@ const Hero = () => {
         ref={videoFrameRef}
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
-        aria-label="Hero Section"
+        aria-label="Bad Company Hero Section"
       >
         {cursorHovering && <GlitchCursor isHovering={cursorHovering} />}
         <div>
@@ -228,6 +269,32 @@ const Hero = () => {
             />
           ))}
         </div>
+
+        {/* BAD (Top-Left) with Softer Glow */}
+        <div
+          ref={badRef}
+          onMouseEnter={() => handleTextMouseEnter(badRef.current)}
+          onMouseLeave={handleMouseLeave}
+          className="absolute top-20 left-10 z-40 text-5xl sm:text-7xl md:text-8xl font-bold opacity-0 neon-glow cursor-none"
+          data-text="BAD"
+        >
+          BAD
+        </div>
+
+        {/* COMPANY (Bottom-Right) with Softer Glow */}
+        <div
+          ref={companyRef}
+          onMouseEnter={() => handleTextMouseEnter(companyRef.current)}
+          onMouseLeave={handleMouseLeave}
+          className="absolute bottom-10 right-10 z-40 text-5xl sm:text-7xl md:text-8xl font-bold opacity-0 neon-glow cursor-none"
+          data-text="COMPANY"
+        >
+          COMPANY
+        </div>
+      </div>
+      {/* "COMPANY" static text */}
+      <div className="absolute bottom-10 right-10 text-5xl sm:text-7xl md:text-8xl font-bold text-white">
+        COMPANY
       </div>
       <style jsx>{`
         /* Extra Glow Effect */

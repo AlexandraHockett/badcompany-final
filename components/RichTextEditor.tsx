@@ -1,222 +1,311 @@
+// components/RichTextEditor.tsx
 "use client";
 
-import { useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import LinkExtension from "@tiptap/extension-link";
-import ImageExtension from "@tiptap/extension-image";
-import TextAlignExtension from "@tiptap/extension-text-align";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Bold,
   Italic,
+  Underline,
   List,
   ListOrdered,
-  Link,
-  Images,
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Link,
+  Image,
+  Type,
+  Code,
 } from "lucide-react";
-import { Toggle } from "@/components/ui/toggle";
-import { Button } from "@/components/ui/button";
 
+// Interface para as props do componente
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
 }
 
-export default function RichTextEditor({
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
   className = "",
-}: RichTextEditorProps) {
-  const [isSourceMode, setIsSourceMode] = useState(false);
-  const [sourceValue, setSourceValue] = useState(value);
+}) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      LinkExtension.configure({
-        openOnClick: false,
-        protocols: ["http", "https", "mailto"],
-      }),
-      ImageExtension,
-      TextAlignExtension.configure({
-        types: ["heading", "paragraph"],
-      }),
-    ],
-    content: value,
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
-    },
-  });
+  // Sincronizar o conteúdo do editor com o estado externo
+  useEffect(() => {
+    if (editorRef.current && value) {
+      if (editorRef.current.innerHTML !== value) {
+        editorRef.current.innerHTML = value;
+      }
+    }
+  }, [value]);
 
-  // Função para adicionar link
-  const addLink = () => {
-    if (!editor) return;
-
-    const url = prompt("Digite a URL do link:");
-    const linkText = prompt("Texto do link (opcional):");
-
-    if (url) {
-      const selectedText = editor.state.selection
-        .content()
-        .content.textBetween(0, editor.state.selection.content().content.size);
-
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: url })
-        .insertContent(linkText || selectedText || url)
-        .run();
+  // Manipular mudanças no editor
+  const handleEditorChange = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
     }
   };
 
-  // Função para adicionar imagem
-  const addImage = () => {
-    if (!editor) return;
-
-    const url = prompt("Digite a URL da imagem:");
-    const altText = prompt("Descrição da imagem (alt text):");
-
-    if (url) {
-      editor
-        .chain()
-        .focus()
-        .setImage({ src: url, alt: altText || "" })
-        .run();
+  // Aplicar comandos de formatação
+  const execCommand = (command: string, value: string = "") => {
+    document.execCommand(command, false, value);
+    handleEditorChange();
+    if (editorRef.current) {
+      editorRef.current.focus();
     }
   };
 
-  // Renderizar botões de formatação
-  const renderFormatButtons = () => {
-    if (!editor) return null;
-
-    const buttons = [
-      {
-        icon: <Bold className="h-4 w-4" />,
-        action: () => editor.chain().focus().toggleBold().run(),
-        isActive: editor.isActive("bold"),
-        title: "Negrito",
-      },
-      {
-        icon: <Italic className="h-4 w-4" />,
-        action: () => editor.chain().focus().toggleItalic().run(),
-        isActive: editor.isActive("italic"),
-        title: "Itálico",
-      },
-      {
-        icon: <List className="h-4 w-4" />,
-        action: () => editor.chain().focus().toggleBulletList().run(),
-        isActive: editor.isActive("bulletList"),
-        title: "Lista com marcadores",
-      },
-      {
-        icon: <ListOrdered className="h-4 w-4" />,
-        action: () => editor.chain().focus().toggleOrderedList().run(),
-        isActive: editor.isActive("orderedList"),
-        title: "Lista numerada",
-      },
-      {
-        icon: <Link className="h-4 w-4" />,
-        action: addLink,
-        isActive: false,
-        title: "Inserir link",
-      },
-      {
-        icon: <Images className="h-4 w-4" />,
-        action: addImage,
-        isActive: false,
-        title: "Inserir imagem",
-      },
-      {
-        icon: <AlignLeft className="h-4 w-4" />,
-        action: () => editor.chain().focus().setTextAlign("left").run(),
-        isActive: editor.isActive({ textAlign: "left" }),
-        title: "Alinhar à esquerda",
-      },
-      {
-        icon: <AlignCenter className="h-4 w-4" />,
-        action: () => editor.chain().focus().setTextAlign("center").run(),
-        isActive: editor.isActive({ textAlign: "center" }),
-        title: "Centralizar",
-      },
-      {
-        icon: <AlignRight className="h-4 w-4" />,
-        action: () => editor.chain().focus().setTextAlign("right").run(),
-        isActive: editor.isActive({ textAlign: "right" }),
-        title: "Alinhar à direita",
-      },
-    ];
-
-    return buttons.map((button, index) => (
-      <Toggle
-        key={index}
-        pressed={button.isActive}
-        onPressedChange={() => button.action()}
-        className={`${button.isActive ? "bg-gray-700" : ""}`}
-        disabled={isSourceMode}
-        title={button.title}
-      >
-        {button.icon}
-      </Toggle>
-    ));
-  };
-
-  // Renderização condicional baseada no modo
-  const renderEditorContent = () => {
-    if (isSourceMode) {
-      return (
-        <textarea
-          value={sourceValue}
-          onChange={(e) => {
-            const newValue = e.target.value;
-            setSourceValue(newValue);
-            onChange(newValue);
-          }}
-          className="w-full h-64 p-4 bg-gray-900 text-white font-mono text-sm outline-none resize-y"
-          placeholder="Digite ou cole o HTML aqui..."
-        />
+  // Inserir link
+  const insertLink = () => {
+    if (linkUrl) {
+      const text = linkText || linkUrl;
+      execCommand(
+        "insertHTML",
+        `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`
       );
+      setIsLinkDialogOpen(false);
+      setLinkUrl("");
+      setLinkText("");
     }
+  };
 
-    return (
-      <EditorContent
-        editor={editor}
-        className="w-full min-h-[250px] max-h-[500px] p-4 bg-gray-900 text-white outline-none overflow-y-auto"
-      />
-    );
+  // Manipular mudanças no tamanho da fonte
+  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    execCommand("fontSize", e.target.value);
+  };
+
+  // Manipular mudanças na cor do texto
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    execCommand("foreColor", e.target.value);
+  };
+
+  // Manipular mudanças na cor de fundo
+  const handleBgColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    execCommand("hiliteColor", e.target.value);
   };
 
   return (
-    <div
-      className={`border border-gray-700 rounded-lg overflow-hidden ${className}`}
-    >
-      <div className="bg-gray-900 p-2 border-b border-gray-700 flex flex-wrap items-center gap-1">
-        {renderFormatButtons()}
-
-        <div className="ml-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (isSourceMode) {
-                // Ao voltar do modo fonte, define o conteúdo do editor
-                editor?.commands.setContent(sourceValue);
-              }
-              setIsSourceMode(!isSourceMode);
-            }}
-            className={isSourceMode ? "bg-purple-700" : ""}
-          >
-            {isSourceMode ? "Visual" : "HTML"}
-          </Button>
+    <div className={`border rounded-md overflow-hidden ${className}`}>
+      {/* Barra de ferramentas */}
+      <div className="bg-gray-800 border-b border-gray-700 p-2 flex flex-wrap gap-1">
+        <button
+          type="button"
+          onClick={() => execCommand("bold")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Negrito"
+        >
+          <Bold className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("italic")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Itálico"
+        >
+          <Italic className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("underline")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Sublinhado"
+        >
+          <Underline className="h-4 w-4" />
+        </button>
+        <div className="h-6 w-px bg-gray-700 mx-1"></div>
+        <button
+          type="button"
+          onClick={() => execCommand("insertUnorderedList")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Lista com marcadores"
+        >
+          <List className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("insertOrderedList")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Lista numerada"
+        >
+          <ListOrdered className="h-4 w-4" />
+        </button>
+        <div className="h-6 w-px bg-gray-700 mx-1"></div>
+        <button
+          type="button"
+          onClick={() => execCommand("justifyLeft")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Alinhar à esquerda"
+        >
+          <AlignLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("justifyCenter")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Centralizar"
+        >
+          <AlignCenter className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("justifyRight")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Alinhar à direita"
+        >
+          <AlignRight className="h-4 w-4" />
+        </button>
+        <div className="h-6 w-px bg-gray-700 mx-1"></div>
+        <button
+          type="button"
+          onClick={() => setIsLinkDialogOpen(true)}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Inserir link"
+        >
+          <Link className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const url = prompt("Insira a URL da imagem:");
+            if (url) execCommand("insertImage", url);
+          }}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Inserir imagem"
+        >
+          <Image className="h-4 w-4" />
+        </button>
+        <div className="h-6 w-px bg-gray-700 mx-1"></div>
+        <select
+          onChange={handleFontSizeChange}
+          className="p-1 text-xs rounded bg-gray-800 border border-gray-700 hover:bg-gray-700"
+          title="Tamanho da fonte"
+        >
+          <option value="">Tamanho</option>
+          <option value="1">Muito pequeno</option>
+          <option value="2">Pequeno</option>
+          <option value="3">Normal</option>
+          <option value="4">Médio</option>
+          <option value="5">Grande</option>
+          <option value="6">Muito grande</option>
+          <option value="7">Enorme</option>
+        </select>
+        <div className="flex items-center">
+          <span className="text-xs mr-1">Cor:</span>
+          <input
+            type="color"
+            onChange={handleColorChange}
+            className="w-6 h-6 p-0 border-0 rounded cursor-pointer"
+            title="Cor do texto"
+          />
         </div>
+        <div className="flex items-center">
+          <span className="text-xs mr-1">Fundo:</span>
+          <input
+            type="color"
+            onChange={handleBgColorChange}
+            className="w-6 h-6 p-0 border-0 rounded cursor-pointer"
+            title="Cor de fundo"
+          />
+        </div>
+        <div className="h-6 w-px bg-gray-700 mx-1"></div>
+        <button
+          type="button"
+          onClick={() => execCommand("formatBlock", "<h1>")}
+          className="p-1.5 rounded hover:bg-gray-700 font-bold"
+          title="Título grande"
+        >
+          <Type className="h-4 w-4" />
+          <span className="text-xs ml-1">H1</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("formatBlock", "<h2>")}
+          className="p-1.5 rounded hover:bg-gray-700 font-bold"
+          title="Título médio"
+        >
+          <Type className="h-4 w-4" />
+          <span className="text-xs ml-1">H2</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("formatBlock", "<p>")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Parágrafo"
+        >
+          <Type className="h-4 w-4" />
+          <span className="text-xs ml-1">P</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => execCommand("formatBlock", "<pre>")}
+          className="p-1.5 rounded hover:bg-gray-700"
+          title="Código"
+        >
+          <Code className="h-4 w-4" />
+        </button>
       </div>
 
-      {renderEditorContent()}
+      {/* Dialog para inserir link */}
+      {isLinkDialogOpen && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-gray-800 p-4 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">Inserir Link</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm mb-1">URL</label>
+                <input
+                  type="text"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  className="w-full p-2 rounded bg-gray-900 border border-gray-700"
+                  placeholder="https://exemplo.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Texto</label>
+                <input
+                  type="text"
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  className="w-full p-2 rounded bg-gray-900 border border-gray-700"
+                  placeholder="Texto do link (opcional)"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsLinkDialogOpen(false)}
+                  className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={insertLink}
+                  className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700"
+                >
+                  Inserir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Área editável */}
+      <div
+        ref={editorRef}
+        contentEditable
+        className="min-h-[200px] p-4 focus:outline-none bg-gray-900 text-white"
+        onInput={handleEditorChange}
+        onBlur={handleEditorChange}
+      />
     </div>
   );
-}
+};
+
+export default RichTextEditor;
