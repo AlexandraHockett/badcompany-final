@@ -176,7 +176,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="p-1.5 rounded hover:bg-gray-700"
           title="Inserir imagem"
         >
-          <Image className="h-4 w-4" />
+          <Image className="h-4 w-4" /> {/* No alt needed for decorative SVG */}
         </button>
         <div className="h-6 w-px bg-gray-700 mx-1"></div>
         <select

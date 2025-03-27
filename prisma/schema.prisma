@@ -1,16 +1,61 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["extendedWhereUnique"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // Estas opções ajustam o comportamento de conexão
   directUrl = env("DATABASE_URL")
-  
-  // Aumentar o tempo limite da conexão não é possível diretamente no schema,
-  // mas o Prisma usa valores razoáveis por padrão
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  image         String?
+  role          String    @default("user") // "user" or "admin"
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relation fields
+  accounts      Account[]
+  sessions      Session[]
+}
+
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+// You may also want to add this model for authentication sessions if using NextAuth
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
 }
 
 model Visitor {
@@ -19,27 +64,27 @@ model Visitor {
   firstVisit   DateTime
   lastVisit    DateTime
   visitCount   Int      @default(1)
-  subscriberId Int?     // Adicione esta linha
+  subscriberId Int?
   subscriber   NewsletterSubscriber? @relation(fields: [subscriberId], references: [id])
 }
 
 model NewsletterSubscriber {
-  id           Int      @id @default(autoincrement())
-  email             String                        @unique
-  name              String?
-  source            String?
-  active            Boolean                       @default(true)
-  createdAt         DateTime                      @default(now())
-  updatedAt         DateTime                      @updatedAt
-  preferences       Json?
-  lastEmailSentAt   DateTime?
-  emailsSent        Int                           @default(0)
+  id               Int                         @id @default(autoincrement())
+  email            String                      @unique
+  name             String?
+  source           String?
+  active           Boolean                     @default(true)
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+  preferences      Json?
+  lastEmailSentAt  DateTime?
+  emailsSent       Int                         @default(0)
   unsubscribeReason String?
-  unsubscribedAt    DateTime?
-  campaigns         NewsletterCampaignRecipient[]
-  linkClicks        NewsletterLinkClick[]
-  unsubscribes      NewsletterUnsubscribe[]
-  visitors          Visitor[]
+  unsubscribedAt   DateTime?
+  campaigns        NewsletterCampaignRecipient[]
+  linkClicks       NewsletterLinkClick[]
+  unsubscribes     NewsletterUnsubscribe[]
+  visitors         Visitor[]
 
   @@index([email])
   @@index([active])
