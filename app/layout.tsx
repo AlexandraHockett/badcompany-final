@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { helveticaNeue } from "./fonts"; // Import the primary font
+import { helveticaNeue } from "./fonts";
 import NewsletterModal from "@/components/NewsletterModal";
 import Providers from "@/components/Providers";
+import LayoutContent from "./LayoutContent"; // Import the new client component
 
 export const metadata: Metadata = {
   title: "BadCompany | Eventos Inovadores e Memoráveis",
@@ -49,18 +50,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt"
-      className={`${helveticaNeue.variable}`} // Apply the primary font variable
-    >
+    <html lang="pt" className={`${helveticaNeue.variable}`}>
       <body className="flex flex-col min-h-screen">
         <Providers>
-          <Header />
-          <main>
-            {children}
-            <NewsletterModal />
-          </main>
-          <Footer />
+          <LayoutContent>{children}</LayoutContent>
         </Providers>
       </body>
     </html>

@@ -186,7 +186,7 @@ const Footer = ({ className = "" }: FooterProps) => {
               ))}
               {/* Admin Login Link - subtle in footer */}
               <div className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
-                <Link href="/login">Área Administrativa</Link>
+                <Link href="/newsletter-login">Área Administrativa</Link>
               </div>
             </div>
           </div>

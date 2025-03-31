@@ -1,11 +1,9 @@
 // app/(admin)/dashboard/page.tsx
-// app/(admin)/dashboard/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useSession } from "next-auth/react"; // Importação adicionada
 import {
   Card,
   CardContent,
@@ -27,17 +25,9 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data: session } = useSession(); // Adicionado para obter a sessão do usuário
   const [totalVisitors, setTotalVisitors] = useState<number | null>(null);
   const [uniqueDevices, setUniqueDevices] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Redirecionar gerentes de newsletter para a seção apropriada
-  useEffect(() => {
-    if (session?.user?.role === "newsletter_manager") {
-      router.push("/dashboard/newsletter");
-    }
-  }, [session, router]);
 
   // Fetch visitor data
   useEffect(() => {

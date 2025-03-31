@@ -1,9 +1,8 @@
-// app/(admin)/dashboard/layout.tsx
 "use client";
 
 import React, { useState, ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
@@ -44,6 +43,7 @@ function SidebarLink({
   onClick,
   subLinks,
 }: SidebarLinkProps) {
+  const pathname = usePathname(); // Ensure this is called at the top level
   const [expanded, setExpanded] = useState(active && subLinks ? true : false);
 
   const toggleExpand = (e: React.MouseEvent) => {
@@ -95,7 +95,7 @@ function SidebarLink({
             >
               <div className="ml-4 pl-4 border-l border-gray-700 mt-1">
                 {subLinks.map((subLink, idx) => {
-                  const subActive = usePathname() === subLink.href;
+                  const subActive = pathname === subLink.href;
                   return (
                     <Link
                       key={idx}
@@ -120,15 +120,21 @@ function SidebarLink({
   );
 }
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function AdminLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Create an array of navigation items
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push("/login");
+  };
+
   const navItems = [
     {
       href: "/dashboard",
@@ -245,7 +251,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-800">
-          <button className="flex items-center justify-center w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          >
             <LogOut className="h-4 w-4 mr-2" />
             <span>Sair</span>
           </button>
