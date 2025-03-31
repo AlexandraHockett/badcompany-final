@@ -1,12 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Loading from "@/components/Loading"; // Ensure this component exists
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      {" "}
+      {/* Fallback while loading */}
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";

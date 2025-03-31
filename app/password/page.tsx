@@ -1,11 +1,23 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Cookies from "js-cookie";
+import Loading from "@/components/Loading"; // Ensure this exists
 
 export default function PasswordPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      {" "}
+      {/* Fallback while loading */}
+      <PasswordContent />
+    </Suspense>
+  );
+}
+
+function PasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";

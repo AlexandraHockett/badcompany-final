@@ -1,13 +1,24 @@
 // app\(auth)\admin\login\page.tsx
 "use client";
 
-import React, { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Loading from "@/components/Loading"; // Make sure you have this component
 
 export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      {" "}
+      {/* Fallback while loading */}
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
@@ -34,8 +45,7 @@ export default function AdminLoginPage() {
         email,
         password,
         callbackUrl,
-        // Add a flag to indicate this is an admin login attempt
-        isAdmin: true,
+        isAdmin: true, // Flag to indicate admin login
       });
 
       if (!res?.error) {
