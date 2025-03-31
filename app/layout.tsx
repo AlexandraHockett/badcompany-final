@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { helveticaNeue } from "./fonts"; // Import the primary font
 import NewsletterModal from "@/components/NewsletterModal";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "BadCompany | Eventos Inovadores e Memoráveis",
@@ -53,12 +54,14 @@ export default function RootLayout({
       className={`${helveticaNeue.variable}`} // Apply the primary font variable
     >
       <body className="flex flex-col min-h-screen">
-        <Header />
-        <main>
-          {children}
-          <NewsletterModal />
-        </main>
-        <Footer />
+        <Providers>
+          <Header />
+          <main>
+            {children}
+            <NewsletterModal />
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

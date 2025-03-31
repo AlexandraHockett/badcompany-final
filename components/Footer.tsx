@@ -11,7 +11,6 @@ interface SocialLink {
   hoverColor: string;
 }
 
-// Moved outside component to prevent recreation on each render
 const links: SocialLink[] = [
   {
     href: "https://www.instagram.com/badcompany_oficial",
@@ -30,7 +29,6 @@ const links: SocialLink[] = [
   },
 ];
 
-// Calculate current year once, outside the component
 const currentYear = new Date().getFullYear();
 
 interface FooterProps {
@@ -38,14 +36,12 @@ interface FooterProps {
 }
 
 const Footer = ({ className = "" }: FooterProps) => {
-  // Use client-side only rendering approach
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Styles for the client-side only animations
   const clientOnlyStyles = isClient
     ? {
         transition: "opacity 0.5s, transform 0.5s",
@@ -54,7 +50,6 @@ const Footer = ({ className = "" }: FooterProps) => {
       }
     : {};
 
-  // Legal links
   const legalLinks = [
     {
       href: "/politica-de-privacidade",
@@ -173,7 +168,7 @@ const Footer = ({ className = "" }: FooterProps) => {
           />
         </div>
 
-        {/* Bottom Section: Legal + Credits + Socials */}
+        {/* Bottom Section: Legal + Credits + Admin Link */}
         <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-8 text-sm text-gray-400">
           <p>© {currentYear} BadCompany. Todos os direitos reservados.</p>
 
@@ -189,6 +184,10 @@ const Footer = ({ className = "" }: FooterProps) => {
                   {link.label}
                 </Link>
               ))}
+              {/* Admin Login Link - subtle in footer */}
+              <div className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
+                <Link href="/admin/login">Área Administrativa</Link>
+              </div>
             </div>
           </div>
 

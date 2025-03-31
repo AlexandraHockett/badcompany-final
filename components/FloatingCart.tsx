@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { CartItem, BaseProduct } from "@/types/types";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface FloatingCartProps {
   cartItems: CartItem[];
@@ -19,6 +21,8 @@ export default function FloatingCart({
   onAddToCart,
 }: FloatingCartProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = cartItems.reduce(
@@ -31,6 +35,17 @@ export default function FloatingCart({
     setIsOpen(false);
   };
 
+  const handleCheckout = () => {
+    if (!session) {
+      // If not logged in, redirect to login with callback URL
+      router.push(`/login?callbackUrl=${encodeURIComponent("/loja/checkout")}`);
+      closeCart();
+    } else {
+      // If logged in, proceed to checkout
+      router.push("/loja/checkout");
+      closeCart();
+    }
+  };
   return (
     <>
       {/* Cart Button */}
@@ -70,7 +85,7 @@ export default function FloatingCart({
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop - Mantém por toda altura mas com clique disponível */}
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -79,7 +94,7 @@ export default function FloatingCart({
               onClick={closeCart}
             />
 
-            {/* Cart Panel - Ajustado para não ir até o topo */}
+            {/* Cart Panel */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -239,6 +254,7 @@ export default function FloatingCart({
                   </span>
                 </div>
                 <button
+                  onClick={handleCheckout}
                   disabled={cartItems.length === 0}
                   className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >

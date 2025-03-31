@@ -20,7 +20,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError("Por favor, preencha todos os campos");
       return;
     }
 
@@ -39,11 +39,11 @@ export default function LoginPage() {
         router.push(callbackUrl);
         router.refresh();
       } else {
-        setError(res.error);
+        setError("Email ou senha incorretos");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setError("An error occurred during login");
+      console.error("Erro de login:", error);
+      setError("Ocorreu um erro durante o login");
     } finally {
       setIsLoading(false);
     }
@@ -58,9 +58,9 @@ export default function LoginPage() {
         className="w-full max-w-md p-8 space-y-8 bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-xl border border-gray-700"
       >
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Login</h1>
+          <h1 className="text-3xl font-bold text-white">Iniciar Sessão</h1>
           <p className="mt-2 text-sm text-gray-400">
-            Sign in to access BadCompany admin panel
+            Aceda à sua conta BadCompany
           </p>
         </div>
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="your@email.com"
+              placeholder="seu@email.com"
             />
           </div>
 
@@ -95,7 +95,7 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-300"
             >
-              Password
+              Senha
             </label>
             <input
               id="password"
@@ -137,7 +137,7 @@ export default function LoginPage() {
                   ></path>
                 </svg>
               ) : (
-                "Sign in"
+                "Entrar"
               )}
             </button>
           </div>
@@ -145,17 +145,17 @@ export default function LoginPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-400">
-            Don't have an account?{" "}
+            Não tem uma conta?{" "}
             <Link
               href="/register"
               className="text-purple-400 hover:text-purple-300"
             >
-              Register here
+              Registe-se aqui
             </Link>
           </p>
           <p className="mt-2 text-sm text-gray-400">
             <Link href="/" className="text-purple-400 hover:text-purple-300">
-              Back to website
+              Voltar ao website
             </Link>
           </p>
         </div>

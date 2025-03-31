@@ -38,11 +38,12 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        isAdmin: { label: "Is Admin", type: "boolean" },
       },
       async authorize(credentials) {
         // Validate input
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email and password required");
+          throw new Error("Email e senha são obrigatórios");
         }
 
         // Find user by email using explicit model access
@@ -52,7 +53,7 @@ export const authOptions: AuthOptions = {
 
         // Check user existence and password
         if (!user || !user.password) {
-          throw new Error("User not found");
+          throw new Error("Utilizador não encontrado");
         }
 
         // Verify password
@@ -62,7 +63,14 @@ export const authOptions: AuthOptions = {
         );
 
         if (!isPasswordCorrect) {
-          throw new Error("Invalid credentials");
+          throw new Error("Credenciais inválidas");
+        }
+
+        // Check if login is for admin area and user has admin role
+        if (credentials.isAdmin === "true" && user.role !== "admin") {
+          throw new Error(
+            "Acesso negado: permissões de administrador necessárias"
+          );
         }
 
         // Return user object for session
@@ -79,6 +87,7 @@ export const authOptions: AuthOptions = {
   // Authentication flow configuration
   pages: {
     signIn: "/login",
+    error: "/login", // Custom error page
   },
 
   // Session and token management

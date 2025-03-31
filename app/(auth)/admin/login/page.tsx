@@ -1,30 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function RegisterPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !email || !password) {
+    if (!email || !password) {
       setError("Por favor, preencha todos os campos");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("As senhas não correspondem");
       return;
     }
 
@@ -32,29 +28,26 @@ export default function RegisterPage() {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+        callbackUrl,
+        // Add a flag to indicate this is an admin login attempt
+        isAdmin: true,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Falha no registo");
+      if (!res?.error) {
+        router.push(callbackUrl);
+        router.refresh();
+      } else {
+        setError(
+          "Email ou senha incorretos, ou esta conta não tem permissões de administrador"
+        );
       }
-
-      // Redirect to login page after successful registration
-      router.push("/login?registered=true");
     } catch (error) {
-      console.error("Erro de registo:", error);
-      setError(error instanceof Error ? error.message : "Falha no registo");
+      console.error("Erro de login:", error);
+      setError("Ocorreu um erro durante o login");
     } finally {
       setIsLoading(false);
     }
@@ -69,9 +62,9 @@ export default function RegisterPage() {
         className="w-full max-w-md p-8 space-y-8 bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-xl border border-gray-700"
       >
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Criar Conta</h1>
+          <h1 className="text-3xl font-bold text-white">Área Administrativa</h1>
           <p className="mt-2 text-sm text-gray-400">
-            Registe-se para aceder aos serviços BadCompany
+            Acesso exclusivo para administradores
           </p>
         </div>
 
@@ -84,29 +77,10 @@ export default function RegisterPage() {
 
           <div>
             <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Nome
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Seu nome"
-            />
-          </div>
-
-          <div>
-            <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-300"
             >
-              Email
+              Email de Administrador
             </label>
             <input
               id="email"
@@ -116,7 +90,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="seu@email.com"
+              placeholder="admin@badcompany.pt"
             />
           </div>
 
@@ -134,25 +108,6 @@ export default function RegisterPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Confirmar Senha
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="••••••••"
             />
@@ -186,22 +141,13 @@ export default function RegisterPage() {
                   ></path>
                 </svg>
               ) : (
-                "Registar"
+                "Entrar como Administrador"
               )}
             </button>
           </div>
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-400">
-            Já tem uma conta?{" "}
-            <Link
-              href="/login"
-              className="text-purple-400 hover:text-purple-300"
-            >
-              Iniciar sessão
-            </Link>
-          </p>
           <p className="mt-2 text-sm text-gray-400">
             <Link href="/" className="text-purple-400 hover:text-purple-300">
               Voltar ao website
