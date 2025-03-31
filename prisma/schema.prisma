@@ -148,3 +148,20 @@ model NewsletterLinkClick {
   @@index([campaignId])
   @@index([subscriberId])
 }
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String
+  success   Boolean
+  timestamp DateTime @default(now())
+  userAgent String?
+}
+
+model LoginBlocklist {
+  id           String   @id @default(cuid())
+  ip           String   @unique
+  blockedAt    DateTime @default(now())
+  attempts     Int      @default(0)
+  lastAttempt  DateTime @default(now())
+}
