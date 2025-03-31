@@ -1,3 +1,4 @@
+// app\(auth)\admin\login\page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -90,7 +91,7 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="admin@badcompany.pt"
+              placeholder="contact@ahockett.com"
             />
           </div>
 

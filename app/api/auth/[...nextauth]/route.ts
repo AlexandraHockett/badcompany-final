@@ -39,6 +39,7 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
         isAdmin: { label: "Is Admin", type: "boolean" },
+        isNewsletterOnly: { label: "Is Newsletter Only", type: "boolean" },
       },
       async authorize(credentials) {
         // Validate input
@@ -67,9 +68,24 @@ export const authOptions: AuthOptions = {
         }
 
         // Check if login is for admin area and user has admin role
-        if (credentials.isAdmin === "true" && user.role !== "admin") {
+        if (
+          credentials.isAdmin === "true" &&
+          user.role !== "admin" &&
+          user.role !== "newsletter_manager"
+        ) {
           throw new Error(
-            "Acesso negado: permissões de administrador necessárias"
+            "Acesso negado: permissões de administrador ou gerenciador de newsletter necessárias"
+          );
+        }
+
+        // Verificar se é um login para a área de newsletter específica
+        if (
+          credentials.isNewsletterOnly === "true" &&
+          user.role !== "newsletter_manager" &&
+          user.role !== "admin"
+        ) {
+          throw new Error(
+            "Acesso negado: permissões de gerenciador de newsletter necessárias"
           );
         }
 

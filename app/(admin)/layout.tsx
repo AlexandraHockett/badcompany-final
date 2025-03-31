@@ -21,6 +21,7 @@ import {
   Image,
   CreditCard,
 } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 
 interface SidebarLinkProps {
   href: string;
@@ -124,15 +125,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || "";
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    router.push("/login");
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: "/" });
   };
 
   const navItems = [

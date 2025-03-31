@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { signIn } from "next-auth/react";
 
 export default function NewsletterLoginPage() {
   const router = useRouter();
@@ -25,24 +26,18 @@ export default function NewsletterLoginPage() {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch("/api/newsletter-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: "geral@badcompany.pt",
-          password,
-        }),
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: "geral@badcompany.pt",
+        password,
+        isNewsletterOnly: "true",
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (result?.ok) {
         // Redirecionar para o dashboard de newsletter
         router.push("/dashboard/newsletter");
       } else {
-        setError(data.error || "Erro ao fazer login");
+        setError(result?.error || "Credenciais inválidas");
       }
     } catch (error) {
       console.error("Erro de login:", error);
