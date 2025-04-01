@@ -6,6 +6,7 @@ import Image from "next/image";
 import { CartItem, BaseProduct } from "@/types/types";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Button from "./Button";
 
 interface FloatingCartProps {
   cartItems: CartItem[];
@@ -253,13 +254,11 @@ export default function FloatingCart({
                     €{totalPrice.toFixed(2)}
                   </span>
                 </div>
-                <button
-                  onClick={handleCheckout}
-                  disabled={cartItems.length === 0}
-                  className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Finalizar Compra
-                </button>
+                <Button
+                  title="Finalizar Compra"
+                  onClick={() => router.push("/loja/checkout")}
+                  containerClass="w-full"
+                />
               </div>
             </motion.div>
           </>

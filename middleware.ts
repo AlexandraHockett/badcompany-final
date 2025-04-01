@@ -17,43 +17,62 @@ function extractIp(request: NextRequest): string {
   return ip.split(",")[0].trim();
 }
 
-// Function to check Basic Auth
+// Public assets that should bypass authentication
+const publicPaths = [
+  "/_next/",
+  "/favicon.ico",
+  "/images/",
+  "/fonts/",
+  "/api/auth/", // NextAuth API routes should be public
+];
+
+function isPublicPath(path: string): boolean {
+  return publicPaths.some((prefix) => path.startsWith(prefix));
+}
+
 function requireBasicAuth(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Skip for public paths and localhost
+  if (
+    isPublicPath(path) ||
+    request.headers.get("host")?.includes("localhost")
+  ) {
+    return null;
+  }
+
   const authHeader = request.headers.get("authorization");
 
   if (!authHeader) {
-    return NextResponse.json(
-      { error: "Authentication required" },
-      {
-        status: 401,
-        headers: { "WWW-Authenticate": 'Basic realm="Secure Area"' },
-      }
-    );
+    return new Response("Authentication required", {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": 'Basic realm="Secure Site - Development Only"',
+      },
+    });
   }
 
   const [scheme, encoded] = authHeader.split(" ");
 
   if (scheme !== "Basic" || !encoded) {
-    return NextResponse.json(
-      { error: "Invalid authentication scheme" },
-      {
-        status: 401,
-        headers: { "WWW-Authenticate": 'Basic realm="Secure Area"' },
-      }
-    );
+    return new Response("Invalid authentication scheme", {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": 'Basic realm="Secure Site - Development Only"',
+      },
+    });
   }
 
   const buffer = Buffer.from(encoded, "base64");
   const [user, password] = buffer.toString("utf8").split(":");
 
   if (user !== BASIC_AUTH_USER || password !== BASIC_AUTH_PASSWORD) {
-    return NextResponse.json(
-      { error: "Invalid credentials" },
-      {
-        status: 401,
-        headers: { "WWW-Authenticate": 'Basic realm="Secure Area"' },
-      }
-    );
+    return new Response("Invalid credentials", {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": 'Basic realm="Secure Site - Development Only"',
+      },
+    });
   }
 
   return null; // Authentication successful
@@ -62,47 +81,22 @@ function requireBasicAuth(request: NextRequest) {
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Check Basic Auth FIRST for ALL routes
-  const authResponse = requireBasicAuth(request);
-  if (authResponse) {
-    return authResponse;
-  }
-
-  // Extract IP and user agent for logging
-  const ip = extractIp(request);
-  const userAgent = request.headers.get("user-agent") || "";
-
-  // Rate limiting for login routes (only if Basic Auth passed)
-  const loginRoutes = [
-    "/login",
-    "/admin/login",
-    "/newsletter-login",
-    "/api/auth/signin",
-  ];
-
-  if (loginRoutes.some((route) => path.includes(route))) {
-    const isAllowed = await checkLoginAllowed(ip);
-
-    if (!isAllowed) {
-      return NextResponse.json(
-        {
-          error: `Too many login attempts. Try again in ${BLOCK_DURATION_MINUTES} minutes.`,
-        },
-        { status: 429 }
-      );
+  // Apply Basic Auth to all routes (except localhost and public paths)
+  if (BASIC_AUTH_USER && BASIC_AUTH_PASSWORD) {
+    const authResponse = requireBasicAuth(request);
+    if (authResponse) {
+      return authResponse;
     }
-
-    // Log the attempt with placeholder values
-    await logLoginAttempt("unknown", false, ip, userAgent);
   }
 
-  // Verify protected dashboard routes (only if Basic Auth passed)
+  // Verify protected dashboard routes
   if (path.startsWith("/dashboard")) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
 
+    // Se não há token, redirecionar para login
     if (!token) {
       return NextResponse.redirect(
         new URL(
@@ -113,7 +107,9 @@ export async function middleware(request: NextRequest) {
     }
 
     const userRole = token.role as string;
+    console.log("User role:", userRole); // Debug log
 
+    // Se tem uma role específica do newsletter manager, restringir acesso
     if (
       userRole === "newsletter_manager" &&
       !path.startsWith("/dashboard/newsletter")
@@ -121,19 +117,39 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
 
+    // Admin tem acesso a tudo
     if (userRole === "admin") {
       return NextResponse.next();
     }
 
-    if (userRole === "user") {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    // Usuários regulares não têm acesso ao dashboard
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+
+  // Rate limiting para POSTs em rotas de login
+  if (request.method === "POST") {
+    const loginRoutes = ["/api/auth/callback/credentials", "/api/auth/signin"];
+
+    if (loginRoutes.some((route) => path.includes(route))) {
+      const ip = extractIp(request);
+      const userAgent = request.headers.get("user-agent") || "";
+
+      const isAllowed = await checkLoginAllowed(ip);
+      if (!isAllowed) {
+        return NextResponse.json(
+          {
+            error: `Too many login attempts. Try again in ${BLOCK_DURATION_MINUTES} minutes.`,
+          },
+          { status: 429 }
+        );
+      }
     }
   }
 
   return NextResponse.next();
 }
 
-// Match ALL routes
+// Matcher para todas as rotas, exceto assets estáticos
 export const config = {
-  matcher: ["/((?!_next|_static|_vercel|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

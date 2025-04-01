@@ -19,7 +19,7 @@ export default function CheckoutPage() {
     }
   }, [status, router]);
 
-  // If still loading or not authenticated, show loading state
+  // Show loading state while checking authentication
   if (isLoading || status !== "authenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -41,18 +41,17 @@ export default function CheckoutPage() {
           Detalhes do Pedido
         </h2>
 
-        {/* Add order details here */}
+        {/* User greeting */}
         <p className="text-gray-300 mb-4">
-          Olá, {session.user?.name || session.user?.email}
+          Olá, {session?.user?.name || session?.user?.email}
         </p>
 
-        {/* Checkout form would go here */}
+        {/* Checkout form */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-medium mb-3 text-white">
               Informações de Envio
             </h3>
-            {/* Shipping form fields */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
@@ -63,7 +62,33 @@ export default function CheckoutPage() {
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                 />
               </div>
-              {/* Add more shipping form fields here */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Endereço
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Cidade
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Código Postal
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                />
+              </div>
             </div>
           </div>
 
@@ -71,7 +96,6 @@ export default function CheckoutPage() {
             <h3 className="text-lg font-medium mb-3 text-white">
               Informações de Pagamento
             </h3>
-            {/* Payment form fields */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
@@ -82,7 +106,37 @@ export default function CheckoutPage() {
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                 />
               </div>
-              {/* Add more payment form fields here */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Nome no Cartão
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Data de Validade
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="MM/AA"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    CVV
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="123"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
