@@ -69,43 +69,33 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  // Specific route access checks
-  if (requiresAdminAccess(path)) {
-    // No token or non-admin user
-    if (
-      !token ||
-      (token.role !== "admin" && token.role !== "newsletter_manager")
-    ) {
+  // Check if path is any dashboard route
+  if (path.startsWith("/dashboard")) {
+    // First, ensure user is authenticated
+    if (!token) {
+      return NextResponse.redirect(
+        new URL(`/login?callbackUrl=${encodeURIComponent(path)}`, request.url)
+      );
+    }
+
+    // For newsletter paths, only allow admin and newsletter_manager
+    if (requiresNewsletterAccess(path)) {
+      if (token.role !== "admin" && token.role !== "newsletter_manager") {
+        return NextResponse.redirect(
+          new URL(
+            `/unauthorized?message=${encodeURIComponent("Acesso restrito a gerentes de newsletter")}`,
+            request.url
+          )
+        );
+      }
+    }
+    // For all other dashboard paths, only allow admin
+    else if (token.role !== "admin") {
       return NextResponse.redirect(
         new URL(
           `/unauthorized?message=${encodeURIComponent("Acesso restrito a administradores")}`,
           request.url
         )
-      );
-    }
-  }
-
-  if (requiresNewsletterAccess(path)) {
-    // Specific check for newsletter paths
-    if (
-      !token ||
-      (token.role !== "newsletter_manager" && token.role !== "admin")
-    ) {
-      return NextResponse.redirect(
-        new URL(
-          `/unauthorized?message=${encodeURIComponent("Acesso restrito a gerentes de newsletter")}`,
-          request.url
-        )
-      );
-    }
-  }
-
-  // Default dashboard path for regular users
-  if (path === "/dashboard") {
-    // Ensure user is authenticated
-    if (!token) {
-      return NextResponse.redirect(
-        new URL(`/login?callbackUrl=${encodeURIComponent(path)}`, request.url)
       );
     }
   }

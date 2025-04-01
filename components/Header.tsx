@@ -9,6 +9,7 @@ import Playbutton from "./Playbutton";
 import { useSession } from "next-auth/react";
 import { ShoppingCart, User } from "lucide-react";
 import LogoutButton from "@/components/LogoutButton";
+import { CartItem } from "@/types/types";
 
 // Memoize nav items to prevent unnecessary re-rendering
 const navItems = [
@@ -30,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const { data: session } = useSession();
 
   const navContainerRef = useRef<HTMLDivElement>(null);
@@ -37,6 +39,36 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const audioElementRef = useRef<HTMLAudioElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
   const scrollTimeoutRef = useRef<number | null>(null);
+
+  // Get cart items from localStorage
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      try {
+        setCartItems(JSON.parse(storedCart));
+      } catch (error) {
+        console.error("Error parsing cart data:", error);
+        setCartItems([]);
+      }
+    }
+
+    // Optional: Set up a storage event listener to update when cart changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "cart" && e.newValue) {
+        try {
+          setCartItems(JSON.parse(e.newValue));
+        } catch (error) {
+          console.error("Error parsing cart data from storage event:", error);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const handleScroll = useCallback(() => {
     if (scrollTimeoutRef.current) {
@@ -210,12 +242,18 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               <div className="hidden md:flex items-center nav-container space-x-4">
                 <NavLinks />
                 <div className="flex items-center space-x-4">
-                  <Link
-                    href="/loja/checkout"
-                    className="text-white hover:text-purple-300 transition-colors"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                  </Link>
+                  {cartItems.length > 0 && (
+                    <Link
+                      href="/loja/checkout"
+                      className="text-white hover:text-purple-300 transition-colors relative"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                        {cartItems.length}
+                      </span>
+                    </Link>
+                  )}
+
                   {!session ? (
                     <Link
                       href="/login"
@@ -225,8 +263,9 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                     </Link>
                   ) : (
                     <div className="flex items-center space-x-2 relative">
-                      <span
-                        className="text-white text-base auth-text whitespace-nowrap overflow-hidden text-ellipsis"
+                      <Link
+                        href="/profile"
+                        className="text-white text-base auth-text whitespace-nowrap overflow-hidden text-ellipsis hover:text-purple-300 transition-colors"
                         style={{ maxWidth: "150px" }}
                         title={session.user?.name || session.user?.email} // Tooltip with full name
                       >
@@ -236,7 +275,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                             ? "..."
                             : ""
                         }`}
-                      </span>
+                      </Link>
                       <LogoutButton
                         variant="icon"
                         className="hover:text-red-500 text-white"
@@ -299,13 +338,18 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           ))}
 
           <div className="w-full space-y-4 mt-4">
-            <Link
-              href="/loja/checkout"
-              className="flex items-center justify-center py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <ShoppingCart className="h-5 w-5 mr-2" /> Carrinho
-            </Link>
+            {cartItems.length > 0 && (
+              <Link
+                href="/loja/checkout"
+                className="flex items-center justify-center py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors relative"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" /> Carrinho
+                <span className="ml-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
+                  {cartItems.length}
+                </span>
+              </Link>
+            )}
 
             {!session ? (
               <Link
@@ -317,9 +361,13 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               </Link>
             ) : (
               <>
-                <div className="flex items-center justify-center py-2 text-white mt-2">
-                  <span>{session.user?.name || session.user?.email}</span>
-                </div>
+                <Link
+                  href="/profile"
+                  className="flex items-center justify-center py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="h-5 w-5 mr-2" /> Meu Perfil
+                </Link>
                 <LogoutButton variant="full" className="w-full mt-2" />
               </>
             )}
