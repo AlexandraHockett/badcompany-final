@@ -26,10 +26,116 @@ const publicPaths = [
   "/api/auth/", // NextAuth API routes should be public
 ];
 
+// Paths that have different access requirements
+const adminPaths = ["/dashboard", "/admin"];
+
+const newsletterPaths = ["/dashboard/newsletter"];
+
 function isPublicPath(path: string): boolean {
   return publicPaths.some((prefix) => path.startsWith(prefix));
 }
 
+function requiresAdminAccess(path: string): boolean {
+  return adminPaths.some((prefix) => path.startsWith(prefix));
+}
+
+function requiresNewsletterAccess(path: string): boolean {
+  return newsletterPaths.some((prefix) => path.startsWith(prefix));
+}
+
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Apply Basic Auth to all routes (except localhost and public paths)
+  if (BASIC_AUTH_USER && BASIC_AUTH_PASSWORD) {
+    const authResponse = requireBasicAuth(request);
+    if (authResponse) {
+      return authResponse;
+    }
+  }
+
+  // Skip authentication for public paths
+  if (isPublicPath(path)) {
+    return NextResponse.next();
+  }
+
+  // Check token for protected routes
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  // Specific route access checks
+  if (requiresAdminAccess(path)) {
+    // No token or non-admin user
+    if (
+      !token ||
+      (token.role !== "admin" && token.role !== "newsletter_manager")
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          `/unauthorized?message=${encodeURIComponent("Acesso restrito a administradores")}`,
+          request.url
+        )
+      );
+    }
+  }
+
+  if (requiresNewsletterAccess(path)) {
+    // Specific check for newsletter paths
+    if (
+      !token ||
+      (token.role !== "newsletter_manager" && token.role !== "admin")
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          `/unauthorized?message=${encodeURIComponent("Acesso restrito a gerentes de newsletter")}`,
+          request.url
+        )
+      );
+    }
+  }
+
+  // Store-specific routes
+  if (path.startsWith("/loja/checkout")) {
+    // Prevent admin or newsletter manager from accessing checkout
+    if (
+      token &&
+      (token.role === "admin" || token.role === "newsletter_manager")
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          `/unauthorized?message=${encodeURIComponent("Use uma conta de cliente para fazer compras")}`,
+          request.url
+        )
+      );
+    }
+  }
+
+  // Rate limiting for POST routes
+  if (request.method === "POST") {
+    const loginRoutes = ["/api/auth/callback/credentials", "/api/auth/signin"];
+
+    if (loginRoutes.some((route) => path.includes(route))) {
+      const ip = extractIp(request);
+      const userAgent = request.headers.get("user-agent") || "";
+
+      const isAllowed = await checkLoginAllowed(ip);
+      if (!isAllowed) {
+        return NextResponse.json(
+          {
+            error: `Too many login attempts. Try again in ${BLOCK_DURATION_MINUTES} minutes.`,
+          },
+          { status: 429 }
+        );
+      }
+    }
+  }
+
+  return NextResponse.next();
+}
+
+// Basic Auth function
 function requireBasicAuth(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
@@ -78,78 +184,7 @@ function requireBasicAuth(request: NextRequest) {
   return null; // Authentication successful
 }
 
-export async function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
-
-  // Apply Basic Auth to all routes (except localhost and public paths)
-  if (BASIC_AUTH_USER && BASIC_AUTH_PASSWORD) {
-    const authResponse = requireBasicAuth(request);
-    if (authResponse) {
-      return authResponse;
-    }
-  }
-
-  // Verify protected dashboard routes
-  if (path.startsWith("/dashboard")) {
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
-
-    // Se não há token, redirecionar para login
-    if (!token) {
-      return NextResponse.redirect(
-        new URL(
-          `/admin/login?callbackUrl=${encodeURIComponent(path)}`,
-          request.url
-        )
-      );
-    }
-
-    const userRole = token.role as string;
-    console.log("User role:", userRole); // Debug log
-
-    // Se tem uma role específica do newsletter manager, restringir acesso
-    if (
-      userRole === "newsletter_manager" &&
-      !path.startsWith("/dashboard/newsletter")
-    ) {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
-    }
-
-    // Admin tem acesso a tudo
-    if (userRole === "admin") {
-      return NextResponse.next();
-    }
-
-    // Usuários regulares não têm acesso ao dashboard
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
-  }
-
-  // Rate limiting para POSTs em rotas de login
-  if (request.method === "POST") {
-    const loginRoutes = ["/api/auth/callback/credentials", "/api/auth/signin"];
-
-    if (loginRoutes.some((route) => path.includes(route))) {
-      const ip = extractIp(request);
-      const userAgent = request.headers.get("user-agent") || "";
-
-      const isAllowed = await checkLoginAllowed(ip);
-      if (!isAllowed) {
-        return NextResponse.json(
-          {
-            error: `Too many login attempts. Try again in ${BLOCK_DURATION_MINUTES} minutes.`,
-          },
-          { status: 429 }
-        );
-      }
-    }
-  }
-
-  return NextResponse.next();
-}
-
-// Matcher para todas as rotas, exceto assets estáticos
+// Matcher for all routes, excluding static assets
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

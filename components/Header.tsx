@@ -6,6 +6,9 @@ import Image from "next/image";
 import gsap from "gsap";
 import { FaBars, FaTimes } from "react-icons/fa";
 import Playbutton from "./Playbutton";
+import { useSession } from "next-auth/react";
+import { ShoppingCart, User } from "lucide-react";
+import LogoutButton from "@/components/LogoutButton";
 
 // Memoize nav items to prevent unnecessary re-rendering
 const navItems = [
@@ -27,6 +30,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session, status } = useSession(); // Added status to handle loading state
 
   const navContainerRef = useRef<HTMLDivElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
@@ -34,28 +38,22 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const animationRef = useRef<gsap.core.Tween | null>(null);
   const scrollTimeoutRef = useRef<number | null>(null);
 
-  // Memoized scroll handler with throttling
   const handleScroll = useCallback(() => {
-    // Clear existing timeout
     if (scrollTimeoutRef.current) {
       window.cancelAnimationFrame(scrollTimeoutRef.current);
     }
 
-    // Schedule new calculation
     scrollTimeoutRef.current = window.requestAnimationFrame(() => {
       const currentScrollY = window.scrollY;
 
       if (navContainerRef.current) {
         if (currentScrollY <= 10) {
-          // At top of page
           setIsNavVisible(true);
           navContainerRef.current.classList.remove("floating-nav");
         } else if (currentScrollY > lastScrollY + 10) {
-          // Scrolling down (with threshold to avoid micro-movements)
           setIsNavVisible(false);
           navContainerRef.current.classList.add("floating-nav");
         } else if (currentScrollY < lastScrollY - 10) {
-          // Scrolling up (with threshold to avoid micro-movements)
           setIsNavVisible(true);
           navContainerRef.current.classList.add("floating-nav");
         }
@@ -65,7 +63,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     });
   }, [lastScrollY]);
 
-  // Set up scroll listener with proper cleanup
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -79,15 +76,12 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     };
   }, [handleScroll]);
 
-  // Apply animation when visibility changes
   useEffect(() => {
     if (navContainerRef.current) {
-      // Kill any existing animation to prevent conflicts
       if (animationRef.current) {
         animationRef.current.kill();
       }
 
-      // Create new animation
       animationRef.current = gsap.to(navContainerRef.current, {
         y: isNavVisible ? 0 : -100,
         opacity: isNavVisible ? 1 : 0,
@@ -97,20 +91,17 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     }
 
     return () => {
-      // Clean up animation on unmount
       if (animationRef.current) {
         animationRef.current.kill();
       }
     };
   }, [isNavVisible]);
 
-  // Toggle audio indicator with proper memoization
   const toggleAudioIndicator = useCallback(() => {
     setIsAudioPlaying((prev) => !prev);
     setIsIndicatorActive((prev) => !prev);
   }, []);
 
-  // Handle audio playback with proper error handling
   useEffect(() => {
     const audioElement = audioElementRef.current;
     if (!audioElement) return;
@@ -124,7 +115,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         }
       } catch (e) {
         console.error("Audio playback error:", e);
-        // Reset state if playback fails
         setIsAudioPlaying(false);
         setIsIndicatorActive(false);
       }
@@ -133,14 +123,12 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     handlePlay();
 
     return () => {
-      // Ensure audio is paused when component unmounts
       if (audioElement) {
         audioElement.pause();
       }
     };
   }, [isAudioPlaying]);
 
-  // Handle mobile menu animations
   useEffect(() => {
     const mobileNav = mobileNavRef.current;
     if (!mobileNav) return;
@@ -162,27 +150,29 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     }
 
     return () => {
-      animation.kill();
+      if (animation) animation.kill();
     };
   }, [isMenuOpen]);
 
-  // Toggle menu with memoization
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
   }, []);
 
-  // Memoized NavItems to prevent unnecessary re-renders
   const NavLinks = memo(() => (
     <>
-      {navItems.map((item) => (
-        <Link key={item.label} href={item.href} className="nav-hover-btn">
+      {navItems.map((item, index) => (
+        <Link
+          key={item.label}
+          href={item.href}
+          className="nav-hover-btn text-base whitespace-nowrap"
+          style={{ marginRight: index === navItems.length - 1 ? "1rem" : "0" }}
+        >
           {item.label}
         </Link>
       ))}
     </>
   ));
 
-  // Memoized AudioIndicator component
   const AudioIndicator = memo(() => (
     <>
       {[1, 2, 3, 4].map((bar) => (
@@ -198,6 +188,11 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     </>
   ));
 
+  // Render nothing until session status is resolved to avoid hydration mismatch
+  if (status === "loading") {
+    return null; // Or a loading placeholder if preferred
+  }
+
   return (
     <>
       <div
@@ -207,35 +202,59 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
       >
         <header className="absolute top-1/2 w-full -translate-y-1/2">
           <nav className="flex size-full items-center justify-between p-4">
-            <div className="flex items-center gap-7">
+            <div className="flex items-center shrink-0">
               <Image
                 src="/images/logo-black.png"
                 alt="logo"
                 width={135}
                 height={135}
                 priority
+                className="min-w-[135px] h-auto"
               />
             </div>
             <div className="flex h-full items-center">
-              <div className="hidden md:block">
+              <div className="hidden md:flex items-center nav-container space-x-6">
                 <NavLinks />
-              </div>
-
-              <div className="hidden md:block">
-                <button
-                  className="ml-10 flex items-center space-x-0.5"
-                  onClick={toggleAudioIndicator}
-                  aria-label={isAudioPlaying ? "Pause audio" : "Play audio"}
-                >
-                  <audio
-                    ref={audioElementRef}
-                    className="hidden"
-                    src="/audio/loop.mp3"
-                    loop
-                    preload="metadata"
-                  />
-                  <AudioIndicator />
-                </button>
+                <div className="flex items-center space-x-4">
+                  <Link
+                    href="/loja/checkout"
+                    className="text-white hover:text-purple-300 transition-colors"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                  </Link>
+                  {!session ? (
+                    <Link
+                      href="/login"
+                      className="flex items-center text-white hover:text-purple-300 transition-colors text-base auth-text whitespace-nowrap"
+                    >
+                      <User className="h-5 w-5 mr-1" /> Login
+                    </Link>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white text-base auth-text whitespace-nowrap">
+                        {session.user?.name || session.user?.email}
+                      </span>
+                      <LogoutButton
+                        variant="icon"
+                        className="hover:text-red-500 text-white"
+                      />
+                    </div>
+                  )}
+                  <button
+                    className="flex items-center space-x-0.5"
+                    onClick={toggleAudioIndicator}
+                    aria-label={isAudioPlaying ? "Pause audio" : "Play audio"}
+                  >
+                    <audio
+                      ref={audioElementRef}
+                      className="hidden"
+                      src="/audio/loop.mp3"
+                      loop
+                      preload="metadata"
+                    />
+                    <AudioIndicator />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -247,7 +266,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               />
             </div>
 
-            {/* Mobile Menu Button */}
             <div className="relative block md:hidden">
               <button
                 className="text-xl z-50 text-blue-200"
@@ -261,7 +279,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         </header>
       </div>
 
-      {/* Mobile Navigation Menu - Below Header with Left-Aligned Links */}
       <div
         ref={mobileNavRef}
         className="fixed top-20 inset-x-0 z-40 bg-black/30 backdrop-blur-md overflow-hidden h-0 opacity-0 transition-all duration-300 md:hidden"
@@ -277,6 +294,33 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               {item.label}
             </Link>
           ))}
+
+          <div className="w-full space-y-4 mt-4">
+            <Link
+              href="/loja/checkout"
+              className="flex items-center justify-center py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <ShoppingCart className="h-5 w-5 mr-2" /> Carrinho
+            </Link>
+
+            {!session ? (
+              <Link
+                href="/login"
+                className="flex items-center justify-center py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors mt-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="h-5 w-5 mr-2" /> Login
+              </Link>
+            ) : (
+              <>
+                <div className="flex items-center justify-center py-2 text-white mt-2">
+                  <span>{session.user?.name || session.user?.email}</span>
+                </div>
+                <LogoutButton variant="full" className="w-full mt-2" />
+              </>
+            )}
+          </div>
         </nav>
       </div>
     </>

@@ -205,6 +205,36 @@ body {
   }
 }
 
+@media (min-width: 1030px) and (max-width: 1139px) {
+  .nav-hover-btn,
+  .auth-text {
+    font-size: 0.875rem; /* 14px, mantido como estava */
+  }
+  .nav-container {
+    gap: 0.25rem; /* Reduzido de 0.5rem para 0.25rem, equivalente a space-x-1 */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 810px) {
+  .nav-hover-btn,
+  .auth-text {
+    font-size: 0.44rem; /* 14px, mantido como estava */
+  }
+  .nav-container {
+    gap: 0rem; /* Reduzido de 0.5rem para 0.25rem, equivalente a space-x-1 */
+  }
+}
+
+@media (min-width: 810px) and (max-width: 1030px) {
+  .nav-hover-btn,
+  .auth-text {
+    font-size: 0.51rem; /* 14px, mantido como estava */
+  }
+  .nav-container {
+    gap: 0rem; /* Reduzido de 0.5rem para 0.25rem, equivalente a space-x-1 */
+  }
+}
+
 /* Agenda */
 @layer utilities {
   .text-stroke {
