@@ -1,18 +1,15 @@
-//app\(auth)\login\page.tsx
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Loading from "@/components/Loading"; // Ensure this component exists
+import Loading from "@/components/Loading";
 
 export default function LoginPage() {
   return (
     <Suspense fallback={<Loading />}>
-      {" "}
-      {/* Fallback while loading */}
       <LoginContent />
     </Suspense>
   );
@@ -21,12 +18,31 @@ export default function LoginPage() {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const registered = searchParams.get("registered") === "true";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Handle registration success message
+  useEffect(() => {
+    if (registered) {
+      setSuccessMessage("Conta criada com sucesso. Faça login para continuar.");
+
+      // Clear the message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+
+      // Clear query parameter to prevent message on refresh
+      router.replace("/login", { scroll: false });
+
+      return () => clearTimeout(timer);
+    }
+  }, [registered, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,13 +92,19 @@ function LoginContent() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {error && (
-            <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
+        {successMessage && (
+          <div className="bg-green-900/50 border border-green-500 text-green-200 px-4 py-3 rounded-md">
+            {successMessage}
+          </div>
+        )}
 
+        {error && (
+          <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div>
             <label
               htmlFor="email"
@@ -103,12 +125,20 @@ function LoginContent() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Senha
-            </label>
+            <div className="flex justify-between">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-300"
+              >
+                Senha
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-purple-400 hover:text-purple-300"
+              >
+                Esqueceu a senha?
+              </Link>
+            </div>
             <input
               id="password"
               name="password"

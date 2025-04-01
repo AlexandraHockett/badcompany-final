@@ -15,11 +15,39 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Email validation regex
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
-    if (!name || !email || !password) {
-      setError("Por favor, preencha todos os campos");
+    // Validation checks
+    if (!name.trim()) {
+      setError("Por favor, insira seu nome");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Por favor, insira seu email");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Por favor, insira um email válido");
+      return;
+    }
+
+    if (!password) {
+      setError("Por favor, insira uma senha");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("A senha deve ter pelo menos 8 caracteres");
       return;
     }
 
@@ -30,31 +58,39 @@ export default function RegisterPage() {
 
     try {
       setIsLoading(true);
-      setError("");
 
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name,
-          email,
+          name: name.trim(),
+          email: email.trim(),
           password,
         }),
       });
 
+      // Parse the response
       const data = await response.json();
 
       if (!response.ok) {
+        // Throw an error with the message from the server
         throw new Error(data.error || "Falha no registo");
       }
 
-      // Redirect to login page after successful registration
+      // Redirect to login with a success parameter
       router.push("/login?registered=true");
     } catch (error) {
       console.error("Erro de registo:", error);
-      setError(error instanceof Error ? error.message : "Falha no registo");
+
+      // Ensure error is an Error object or convert it
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Falha no registo. Por favor, tente novamente.";
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -132,11 +168,15 @@ export default function RegisterPage() {
               name="password"
               type="password"
               required
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="••••••••"
             />
+            <p className="text-xs text-gray-400 mt-1">
+              A senha deve ter no mínimo 8 caracteres
+            </p>
           </div>
 
           <div>
@@ -151,6 +191,7 @@ export default function RegisterPage() {
               name="confirmPassword"
               type="password"
               required
+              minLength={8}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"

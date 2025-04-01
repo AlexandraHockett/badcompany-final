@@ -27,7 +27,11 @@ const publicPaths = [
 ];
 
 // Paths that have different access requirements
-const adminPaths = ["/dashboard", "/admin"];
+const adminPaths = [
+  "/dashboard",
+  "/dashboard/configuracoes",
+  "/dashboard/admin",
+];
 
 const newsletterPaths = ["/dashboard/newsletter"];
 
@@ -92,6 +96,16 @@ export async function middleware(request: NextRequest) {
           `/unauthorized?message=${encodeURIComponent("Acesso restrito a gerentes de newsletter")}`,
           request.url
         )
+      );
+    }
+  }
+
+  // Default dashboard path for regular users
+  if (path === "/dashboard") {
+    // Ensure user is authenticated
+    if (!token) {
+      return NextResponse.redirect(
+        new URL(`/login?callbackUrl=${encodeURIComponent(path)}`, request.url)
       );
     }
   }

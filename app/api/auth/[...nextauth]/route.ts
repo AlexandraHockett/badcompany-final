@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcrypt";
 
-// Type augmentation for NextAuth
+// Ensure the roles are explicitly typed
 declare module "next-auth" {
   interface User {
     id: string;
@@ -38,8 +38,6 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        isAdmin: { label: "Is Admin", type: "boolean" },
-        isNewsletterOnly: { label: "Is Newsletter Only", type: "boolean" },
       },
       async authorize(credentials) {
         // Validate input
@@ -47,7 +45,7 @@ export const authOptions: AuthOptions = {
           throw new Error("Email e senha são obrigatórios");
         }
 
-        // Find user by email using explicit model access
+        // Find user by email
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
@@ -67,34 +65,12 @@ export const authOptions: AuthOptions = {
           throw new Error("Credenciais inválidas");
         }
 
-        // Check if login is for admin area and user has admin role
-        if (
-          credentials.isAdmin === "true" &&
-          user.role !== "admin" &&
-          user.role !== "newsletter_manager"
-        ) {
-          throw new Error(
-            "Acesso negado: permissões de administrador ou gerenciador de newsletter necessárias"
-          );
-        }
-
-        // Verificar se é um login para a área de newsletter específica
-        if (
-          credentials.isNewsletterOnly === "true" &&
-          user.role !== "newsletter_manager" &&
-          user.role !== "admin"
-        ) {
-          throw new Error(
-            "Acesso negado: permissões de gerenciador de newsletter necessárias"
-          );
-        }
-
-        // Return user object for session
+        // Return user object
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role,
+          role: user.role || "user", // Ensure a role is always returned
         };
       },
     }),
@@ -117,7 +93,7 @@ export const authOptions: AuthOptions = {
       // Add user ID and role to token on first login
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role || "user";
       }
       return token;
     },
@@ -125,7 +101,7 @@ export const authOptions: AuthOptions = {
       // Add user ID and role to session
       if (token) {
         session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.role = token.role || "user";
       }
       return session;
     },

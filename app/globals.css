@@ -157,11 +157,56 @@ body {
 /* Header */
 @layer utilities {
   .nav-hover-btn {
-    @apply relative ms-10 text-lg uppercase text-blue-50 after:absolute after:-bottom-0.5 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100 hover:after:bg-purple-200 cursor-pointer;
+    @apply relative md:ms-5 lg:ms-5 text-lg uppercase text-blue-50 after:absolute after:-bottom-0.5 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100 hover:after:bg-purple-200 cursor-pointer;
   }
 
   .floating-nav {
     @apply bg-black rounded-lg border;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1170px) {
+  .nav-hover-btn,
+  .auth-text {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 955px) and (max-width: 1023px) {
+  .nav-hover-btn,
+  .auth-text {
+    font-size: 0.765rem;
+  }
+}
+
+@media (min-width: 921px) and (max-width: 954px) {
+  .nav-hover-btn,
+  .auth-text {
+    font-size: 0.7rem;
+  }
+  /* .nav-container {
+    gap: 0rem;
+  } */
+}
+
+@media (min-width: 814px) and (max-width: 920px) {
+  .nav-hover-btn,
+  .auth-text {
+    margin-left: 0rem;
+    font-size: 0.7rem;
+  }
+  .nav-container {
+    gap: 0rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 813px) {
+  .nav-hover-btn,
+  .auth-text {
+    margin-left: 0rem;
+    font-size: 60%;
+  }
+  .nav-container {
+    gap: 0rem;
   }
 }
 
@@ -202,36 +247,6 @@ body {
   .special-font b {
     font-family: var(--primary-font); /* Use primary font for special cases */
     font-feature-settings: "ss01" on;
-  }
-}
-
-@media (min-width: 1030px) and (max-width: 1139px) {
-  .nav-hover-btn,
-  .auth-text {
-    font-size: 0.875rem; /* 14px, mantido como estava */
-  }
-  .nav-container {
-    gap: 0.25rem; /* Reduzido de 0.5rem para 0.25rem, equivalente a space-x-1 */
-  }
-}
-
-@media (min-width: 768px) and (max-width: 810px) {
-  .nav-hover-btn,
-  .auth-text {
-    font-size: 0.44rem; /* 14px, mantido como estava */
-  }
-  .nav-container {
-    gap: 0rem; /* Reduzido de 0.5rem para 0.25rem, equivalente a space-x-1 */
-  }
-}
-
-@media (min-width: 810px) and (max-width: 1030px) {
-  .nav-hover-btn,
-  .auth-text {
-    font-size: 0.51rem; /* 14px, mantido como estava */
-  }
-  .nav-container {
-    gap: 0rem; /* Reduzido de 0.5rem para 0.25rem, equivalente a space-x-1 */
   }
 }
 

@@ -1,6 +1,5 @@
-// app/api/register/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { hash } from "bcrypt";
 
 export async function POST(req: Request) {
@@ -9,9 +8,26 @@ export async function POST(req: Request) {
     const { name, email, password } = await req.json();
 
     // Validate input
-    if (!email || !password) {
+    if (!name || !email || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Nome, email e senha são obrigatórios" },
+        { status: 400 }
+      );
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Endereço de email inválido" },
+        { status: 400 }
+      );
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "A senha deve ter pelo menos 8 caracteres" },
         { status: 400 }
       );
     }
@@ -23,7 +39,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email already exists" },
+        { error: "Este email já está registado" },
         { status: 400 }
       );
     }
@@ -52,15 +68,21 @@ export async function POST(req: Request) {
     // Return user details (excluding password)
     return NextResponse.json(
       {
-        message: "User created successfully",
+        message: "Usuário criado com sucesso",
         user: newUser,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("Erro de registro:", error);
+
+    // More specific error handling
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json(
-      { error: "An error occurred during registration" },
+      { error: "Erro interno do servidor durante o registro" },
       { status: 500 }
     );
   }

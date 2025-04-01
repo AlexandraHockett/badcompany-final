@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { data: session, status } = useSession(); // Added status to handle loading state
+  const { data: session } = useSession();
 
   const navContainerRef = useRef<HTMLDivElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
@@ -164,8 +164,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         <Link
           key={item.label}
           href={item.href}
-          className="nav-hover-btn text-base whitespace-nowrap"
-          style={{ marginRight: index === navItems.length - 1 ? "1rem" : "0" }}
+          className="nav-hover-btn text-lg md:text-xl whitespace-nowrap"
         >
           {item.label}
         </Link>
@@ -188,11 +187,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     </>
   ));
 
-  // Render nothing until session status is resolved to avoid hydration mismatch
-  if (status === "loading") {
-    return null; // Or a loading placeholder if preferred
-  }
-
   return (
     <>
       <div
@@ -213,7 +207,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               />
             </div>
             <div className="flex h-full items-center">
-              <div className="hidden md:flex items-center nav-container space-x-6">
+              <div className="hidden md:flex items-center nav-container space-x-4">
                 <NavLinks />
                 <div className="flex items-center space-x-4">
                   <Link
@@ -230,9 +224,18 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                       <User className="h-5 w-5 mr-1" /> Login
                     </Link>
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-white text-base auth-text whitespace-nowrap">
-                        {session.user?.name || session.user?.email}
+                    <div className="flex items-center space-x-2 relative">
+                      <span
+                        className="text-white text-base auth-text whitespace-nowrap overflow-hidden text-ellipsis"
+                        style={{ maxWidth: "150px" }}
+                        title={session.user?.name || session.user?.email} // Tooltip with full name
+                      >
+                        {`${(session.user?.name || session.user?.email || "").slice(0, 10)}${
+                          (session.user?.name || session.user?.email || "")
+                            .length > 10
+                            ? "..."
+                            : ""
+                        }`}
                       </span>
                       <LogoutButton
                         variant="icon"
