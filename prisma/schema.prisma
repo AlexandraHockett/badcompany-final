@@ -85,10 +85,35 @@ model NewsletterSubscriber {
   linkClicks       NewsletterLinkClick[]
   unsubscribes     NewsletterUnsubscribe[]
   visitors         Visitor[]
+  tags NewsletterSubscriberTag[]
 
   @@index([email])
   @@index([active])
 }
+
+model NewsletterTag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  color       String   @default("#6366F1") // Cor padrão - índigo
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subscribers NewsletterSubscriberTag[]
+}
+
+model NewsletterSubscriberTag {
+  id           Int                  @id @default(autoincrement())
+  subscriberId Int
+  tagId        Int
+  addedAt      DateTime             @default(now())
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  tag          NewsletterTag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriberId, tagId])
+  @@index([subscriberId])
+  @@index([tagId])
+}
+
 
 model NewsletterCampaign {
   id              Int                           @id @default(autoincrement())

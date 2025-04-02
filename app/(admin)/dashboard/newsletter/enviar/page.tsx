@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import {
   Users,
   AlertCircle,
   type LucideIcon,
+  Check,
 } from "lucide-react";
 
 // Editor de Rich Text com carregamento dinâmico
@@ -63,6 +65,9 @@ export default function NewsletterSender() {
   const [isSent, setIsSent] = useState<boolean>(false);
   const [sentMessage, setSentMessage] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
+  const [testSent, setTestSent] = useState<boolean>(false);
 
   const templates: Template[] = [
     { id: "blank", name: "Em branco" },
@@ -221,6 +226,42 @@ export default function NewsletterSender() {
       console.error("Erro ao enviar newsletter:", err);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const sendTestEmail = async () => {
+    if (!validateForm()) return;
+
+    setIsSendingTest(true);
+    setError(null);
+    setTestSent(false);
+
+    try {
+      const response = await fetch("/api/newsletter-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject,
+          content,
+          preview,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao enviar email de teste");
+      }
+
+      setTestSent(true);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ocorreu um erro ao enviar o email de teste"
+      );
+      console.error("Erro ao enviar email de teste:", err);
+    } finally {
+      setIsSendingTest(false);
     }
   };
 
@@ -462,14 +503,25 @@ export default function NewsletterSender() {
                     <Button
                       variant="outline"
                       className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto"
-                      onClick={() =>
-                        alert(
-                          "Função de envio de teste será implementada em breve."
-                        )
-                      }
+                      onClick={sendTestEmail}
+                      disabled={isSendingTest}
                     >
-                      Enviar teste para o meu email
+                      {isSendingTest ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enviando teste...
+                        </>
+                      ) : (
+                        "Enviar teste para o meu email"
+                      )}
                     </Button>
+
+                    {testSent && (
+                      <div className="mt-2 text-green-400 text-sm flex items-center">
+                        <Check className="h-4 w-4 mr-1" />
+                        <span>Email de teste enviado com sucesso!</span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

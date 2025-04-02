@@ -25,6 +25,11 @@ import {
   ArrowUp,
   ArrowDown,
   Plus,
+  Tag,
+  PlusCircle,
+  X,
+  Upload,
+  FileUp,
 } from "lucide-react";
 
 // Interfaces
@@ -55,7 +60,7 @@ interface StatCardProps {
   title: string;
   icon: React.ReactElement;
   value: string | number;
-  description?: string; // Made optional to match usage
+  description?: string;
   color?: "purple" | "green" | "red" | "blue";
 }
 
@@ -73,7 +78,13 @@ interface SubscriberCardMobileProps {
   onAction: (action: string, id: number) => void;
 }
 
-// Componente de Card de Estatísticas
+interface TagData {
+  id: number;
+  name: string;
+  color: string;
+  subscriberCount?: number;
+}
+
 const StatCard: React.FC<StatCardProps> = ({
   title,
   icon,
@@ -106,7 +117,6 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-// Componente de Header de Tabela com Ordenação
 const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({
   title,
   field,
@@ -134,7 +144,6 @@ const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({
   );
 };
 
-// Componente de Card de Subscriber Mobile
 const SubscriberCardMobile: React.FC<SubscriberCardMobileProps> = ({
   subscriber,
   isSelected,
@@ -221,6 +230,28 @@ export default function SubscribersDashboard() {
     direction: "asc" | "desc";
   }>({ field: "createdAt", direction: "desc" });
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [tags, setTags] = useState<TagData[]>([]);
+  const [showTagManager, setShowTagManager] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagColor, setNewTagColor] = useState("#6366F1");
+  const [selectedSubscriberTags, setSelectedSubscriberTags] = useState<
+    TagData[]
+  >([]);
+  const [isTagLoading, setIsTagLoading] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    success: boolean;
+    stats?: {
+      total: number;
+      inserted: number;
+      updated: number;
+      failed: number;
+    };
+    errors?: { email: string; error: string }[];
+    error?: string;
+  } | null>(null);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -339,8 +370,140 @@ export default function SubscribersDashboard() {
     [statusFilter, sourceFilter, searchTerm, sort]
   );
 
+  const fetchTags = async () => {
+    try {
+      setIsTagLoading(true);
+      setTimeout(() => {
+        setTags([
+          { id: 1, name: "VIP", color: "#EF4444", subscriberCount: 120 },
+          {
+            id: 2,
+            name: "Cliente frequente",
+            color: "#10B981",
+            subscriberCount: 450,
+          },
+          {
+            id: 3,
+            name: "Novo assinante",
+            color: "#3B82F6",
+            subscriberCount: 230,
+          },
+          {
+            id: 4,
+            name: "Interessado em eventos",
+            color: "#8B5CF6",
+            subscriberCount: 580,
+          },
+          {
+            id: 5,
+            name: "Comprou bilhetes",
+            color: "#F59E0B",
+            subscriberCount: 340,
+          },
+        ]);
+        setIsTagLoading(false);
+      }, 800);
+    } catch (error) {
+      console.error("Erro ao buscar tags:", error);
+      setIsTagLoading(false);
+    }
+  };
+
+  const addTag = async () => {
+    if (!newTagName.trim()) return;
+
+    try {
+      setIsTagLoading(true);
+
+      setTimeout(() => {
+        const newTag = {
+          id: tags.length + 1,
+          name: newTagName,
+          color: newTagColor,
+          subscriberCount: 0,
+        };
+        setTags([...tags, newTag]);
+        setNewTagName("");
+        setNewTagColor("#6366F1");
+        setIsTagLoading(false);
+      }, 500);
+    } catch (error) {
+      console.error("Erro ao adicionar tag:", error);
+    } finally {
+      setIsTagLoading(false);
+    }
+  };
+
+  const loadSubscriberTags = async (subscriberId: number) => {
+    try {
+      setIsTagLoading(true);
+
+      setTimeout(() => {
+        const randomTags = tags
+          .filter(() => Math.random() > 0.5)
+          .slice(0, Math.floor(Math.random() * 3) + 1);
+        setSelectedSubscriberTags(randomTags);
+        setIsTagLoading(false);
+      }, 300);
+    } catch (error) {
+      console.error("Erro ao carregar tags do assinante:", error);
+    } finally {
+      setIsTagLoading(false);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!importFile) {
+      setImportResult({
+        success: false,
+        error: "Selecione um arquivo para importar",
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    setImportResult(null);
+
+    try {
+      setTimeout(() => {
+        const mockResult = {
+          success: true,
+          stats: {
+            total: 125,
+            inserted: 98,
+            updated: 24,
+            failed: 3,
+          },
+          errors: importFile.name.includes("error")
+            ? [
+                { email: "invalid@example", error: "Email inválido" },
+                { email: "duplicate@example.com", error: "Email duplicado" },
+                { email: "error@example.com", error: "Erro de processamento" },
+              ]
+            : [],
+        };
+
+        setImportResult(mockResult);
+        setIsImporting(false);
+
+        if (mockResult.success) {
+          fetchSubscribers(1);
+        }
+      }, 2000);
+    } catch (error) {
+      console.error("Erro ao importar:", error);
+      setImportResult({
+        success: false,
+        error: error instanceof Error ? error.message : "Erro desconhecido",
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   useEffect(() => {
     fetchSubscribers();
+    fetchTags();
   }, [fetchSubscribers]);
 
   const goToNextPage = () => {
@@ -431,6 +594,7 @@ export default function SubscribersDashboard() {
   const handleSubscriberAction = (action: string, id?: number) => {
     switch (action) {
       case "view":
+        loadSubscriberTags(id!);
         alert(`Ver detalhes do subscriber ${id}`);
         break;
       case "delete":
@@ -443,6 +607,313 @@ export default function SubscribersDashboard() {
         console.log(`Ação ${action} para ${id || "selecionados"}`);
     }
   };
+
+  const TagManagerModal = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+      onClick={() => setShowTagManager(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-md bg-gray-900 rounded-xl p-6 shadow-xl border border-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold">Gerenciar Tags</h3>
+          <button
+            onClick={() => setShowTagManager(false)}
+            className="p-1 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex gap-2 mb-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Nome da tag"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            <div>
+              <input
+                type="color"
+                value={newTagColor}
+                onChange={(e) => setNewTagColor(e.target.value)}
+                className="w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 cursor-pointer"
+              />
+            </div>
+            <button
+              onClick={addTag}
+              disabled={isTagLoading || !newTagName.trim()}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isTagLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <PlusCircle className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {isTagLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+              </div>
+            ) : tags.length > 0 ? (
+              tags.map((tag) => (
+                <div
+                  key={tag.id}
+                  className="flex items-center justify-between py-2 px-3 bg-gray-800 rounded-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: tag.color }}
+                    ></div>
+                    <span className="font-medium">{tag.name}</span>
+                  </div>
+                  <span className="text-sm text-gray-400">
+                    {tag.subscriberCount} assinantes
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-400">
+                Nenhuma tag criada ainda
+              </div>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowTagManager(false)}
+          className="w-full px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+        >
+          Fechar
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+
+  const ImportModal = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+      onClick={() => setIsImportModalOpen(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-md bg-gray-900 rounded-xl p-6 shadow-xl border border-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold">Importar Assinantes</h3>
+          <button
+            onClick={() => setIsImportModalOpen(false)}
+            className="p-1 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {!importResult ? (
+          <>
+            <div className="mb-6">
+              <p className="text-gray-300 mb-4">
+                Importe assinantes a partir de um arquivo CSV. O arquivo deve
+                conter as seguintes colunas:
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-400 space-y-1 mb-4">
+                <li>
+                  <strong>email</strong> (obrigatório) - Email do assinante
+                </li>
+                <li>
+                  <strong>name</strong> (opcional) - Nome do assinante
+                </li>
+                <li>
+                  <strong>source</strong> (opcional) - Origem do assinante
+                </li>
+              </ul>
+
+              <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center">
+                {importFile ? (
+                  <div className="space-y-2">
+                    <CheckCircle className="h-8 w-8 text-green-400 mx-auto" />
+                    <p className="font-medium">{importFile.name}</p>
+                    <p className="text-sm text-gray-400">
+                      {(importFile.size / 1024).toFixed(1)} KB
+                    </p>
+                    <button
+                      onClick={() => setImportFile(null)}
+                      className="text-sm text-red-400 hover:text-red-300"
+                    >
+                      Remover arquivo
+                    </button>
+                  </div>
+                ) : (
+                  <label className="block cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setImportFile(file);
+                      }}
+                    />
+                    <div className="space-y-2">
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto" />
+                      <p className="text-gray-300">
+                        Clique para selecionar ou arraste um arquivo CSV
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Tamanho máximo: 5MB
+                      </p>
+                    </div>
+                  </label>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsImportModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={!importFile || isImporting}
+                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <FileUp className="h-5 w-5 mr-2" />
+                    Importar
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="space-y-4">
+            <div className="text-center">
+              {importResult.success ? (
+                <>
+                  <CheckCircle className="h-10 w-10 text-green-400 mx-auto mb-2" />
+                  <h4 className="text-lg font-bold text-white">
+                    Importação concluída!
+                  </h4>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="h-10 w-10 text-red-400 mx-auto mb-2" />
+                  <h4 className="text-lg font-bold text-white">
+                    Erro na importação
+                  </h4>
+                  <p className="text-red-400 mt-1">{importResult.error}</p>
+                </>
+              )}
+            </div>
+
+            {importResult.success && importResult.stats && (
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h5 className="font-medium mb-2">Resumo da importação:</h5>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-400">Total processado:</p>
+                    <p className="font-medium">{importResult.stats.total}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Novos assinantes:</p>
+                    <p className="font-medium text-green-400">
+                      {importResult.stats.inserted}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Atualizados:</p>
+                    <p className="font-medium text-blue-400">
+                      {importResult.stats.updated}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Falhas:</p>
+                    <p
+                      className={`font-medium ${importResult.stats.failed > 0 ? "text-red-400" : "text-gray-300"}`}
+                    >
+                      {importResult.stats.failed}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {importResult.success &&
+              importResult.errors &&
+              importResult.errors.length > 0 && (
+                <div className="mt-4">
+                  <h5 className="font-medium mb-2">Erros encontrados:</h5>
+                  <div className="max-h-40 overflow-y-auto bg-gray-800/50 rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-800">
+                        <tr>
+                          <th className="text-left p-2">Email</th>
+                          <th className="text-left p-2">Erro</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-800">
+                        {importResult.errors.map((error, index) => (
+                          <tr key={index}>
+                            <td className="p-2">{error.email}</td>
+                            <td className="p-2 text-red-400">{error.error}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+            <div className="pt-4 flex justify-end">
+              <button
+                onClick={() => {
+                  setIsImportModalOpen(false);
+                  setImportFile(null);
+                  setImportResult(null);
+                }}
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
 
   return (
     <motion.div
@@ -470,6 +941,20 @@ export default function SubscribersDashboard() {
           >
             <Search className="h-4 w-4" />
             <span className="text-sm">Buscar</span>
+          </button>
+          <button
+            onClick={() => setShowTagManager(true)}
+            className="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+          >
+            <Tag size={16} />
+            <span className="text-sm">Gerenciar Tags</span>
+          </button>
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+          >
+            <Upload size={16} />
+            <span className="text-sm">Importar</span>
           </button>
           <button className="flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
             <UserPlus className="h-4 w-4" />
@@ -908,6 +1393,9 @@ export default function SubscribersDashboard() {
           </Link>
         </div>
       </motion.div>
+
+      {showTagManager && <TagManagerModal />}
+      {isImportModalOpen && <ImportModal />}
     </motion.div>
   );
 }
