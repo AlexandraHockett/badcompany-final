@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ import {
   Calendar,
   Users,
   AlertCircle,
-  type LucideIcon,
   Check,
 } from "lucide-react";
 
@@ -54,7 +53,13 @@ interface AudienceOption {
   description: string;
 }
 
-// Removed empty NewsletterSenderProps interface to fix ESLint error
+// Definindo explicitamente as props esperadas pelo RichTextEditor (ajuste conforme o componente real)
+interface RichTextEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}
+
 export default function NewsletterSender() {
   const [subject, setSubject] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -173,6 +178,7 @@ export default function NewsletterSender() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Enviando newsletter oficial...");
     setError(null);
     setIsSent(false);
 
@@ -216,6 +222,8 @@ export default function NewsletterSender() {
         setSubject("");
         setContent("");
         setPreview("");
+        setAudienceType("all"); // Resetar a audiência também
+        setScheduledDate("");
       }
     } catch (err) {
       setError(
@@ -230,6 +238,7 @@ export default function NewsletterSender() {
   };
 
   const sendTestEmail = async () => {
+    console.log("Enviando email de teste...");
     if (!validateForm()) return;
 
     setIsSendingTest(true);
@@ -244,6 +253,7 @@ export default function NewsletterSender() {
           subject,
           content,
           preview,
+          recipientEmail: session?.user?.email,
         }),
       });
 
@@ -262,6 +272,12 @@ export default function NewsletterSender() {
       console.error("Erro ao enviar email de teste:", err);
     } finally {
       setIsSendingTest(false);
+    }
+  };
+
+  const handleContentChange = (value: string) => {
+    if (!isSending && !isSendingTest) {
+      setContent(value);
     }
   };
 
@@ -379,6 +395,7 @@ export default function NewsletterSender() {
                       onChange={(e) => setSubject(e.target.value)}
                       placeholder="Assunto do email"
                       className="bg-gray-800 border-gray-700 text-white"
+                      disabled={isSending || isSendingTest}
                     />
                   </div>
 
@@ -392,21 +409,27 @@ export default function NewsletterSender() {
                       onChange={(e) => setPreview(e.target.value)}
                       placeholder="Texto que aparece na pré-visualização (opcional)"
                       className="bg-gray-800 border-gray-700 text-white"
+                      disabled={isSending || isSendingTest}
                     />
                     <p className="text-xs text-gray-400">
                       Mostrado na pré-visualização em clientes de email
                     </p>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <Label htmlFor="content" className="text-gray-300">
                       Conteúdo
                     </Label>
                     <RichTextEditor
                       value={content}
-                      onChange={setContent}
+                      onChange={handleContentChange}
                       className="min-h-[300px] bg-gray-900 border-gray-800 text-white"
                     />
+                    {(isSending || isSendingTest) && (
+                      <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center rounded-lg">
+                        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -499,12 +522,16 @@ export default function NewsletterSender() {
                       )}
                     </div>
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-4 space-y-2">
                     <Button
+                      type="button"
                       variant="outline"
                       className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto"
-                      onClick={sendTestEmail}
-                      disabled={isSendingTest}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        sendTestEmail();
+                      }}
+                      disabled={isSendingTest || isSending}
                     >
                       {isSendingTest ? (
                         <>
@@ -517,7 +544,7 @@ export default function NewsletterSender() {
                     </Button>
 
                     {testSent && (
-                      <div className="mt-2 text-green-400 text-sm flex items-center">
+                      <div className="text-green-400 text-sm flex items-center">
                         <Check className="h-4 w-4 mr-1" />
                         <span>Email de teste enviado com sucesso!</span>
                       </div>
@@ -549,6 +576,7 @@ export default function NewsletterSender() {
                         onChange={(e) => setScheduledDate(e.target.value)}
                         className="bg-gray-800 border-gray-700 text-white pl-10"
                         min={new Date().toISOString().slice(0, 16)}
+                        disabled={isSending || isSendingTest}
                       />
                     </div>
                     <p className="text-xs text-gray-400">
@@ -603,7 +631,7 @@ export default function NewsletterSender() {
           <Button
             type="submit"
             className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
-            disabled={isSending}
+            disabled={isSending || isSendingTest}
           >
             {isSending ? (
               <>
