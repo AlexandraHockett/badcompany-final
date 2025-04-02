@@ -20,14 +20,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, Calendar, Users, AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Loader2,
+  Send,
+  Calendar,
+  Users,
+  AlertCircle,
+  type LucideIcon,
+} from "lucide-react";
 
-// Editor de Rich Text com carregamento dinâmico para evitar erros de SSR
-const RichTextEditor = dynamic(() => import("@/components/administracao/RichTextEditor"), {
-  ssr: false,
-  loading: () => <div className="h-64 bg-gray-800 rounded-md animate-pulse" />,
-});
+// Editor de Rich Text com carregamento dinâmico
+const RichTextEditor = dynamic(
+  () => import("@/components/administracao/RichTextEditor"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 bg-gray-900/50 border border-gray-800 rounded-lg animate-pulse" />
+    ),
+  }
+);
 
+// Type Definitions
+interface Template {
+  id: string;
+  name: string;
+}
+
+interface AudienceOption {
+  count: number;
+  description: string;
+}
+
+// Removed empty NewsletterSenderProps interface to fix ESLint error
 export default function NewsletterSender() {
   const [subject, setSubject] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -39,30 +64,42 @@ export default function NewsletterSender() {
   const [sentMessage, setSentMessage] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  // Opções de modelos
-  const templates = [
+  const templates: Template[] = [
     { id: "blank", name: "Em branco" },
     { id: "event", name: "Anúncio de evento" },
     { id: "promo", name: "Promoção" },
     { id: "update", name: "Atualização" },
   ];
 
-  // Validação simples
-  const validateForm = () => {
+  const audiencePreview: Record<string, AudienceOption> = {
+    all: { count: 3450, description: "Todos os subscritores ativos" },
+    engaged: {
+      count: 2150,
+      description:
+        "Subscritores que abriram pelo menos um email nos últimos 30 dias",
+    },
+    inactive: {
+      count: 1300,
+      description: "Subscritores que não abriram emails nos últimos 30 dias",
+    },
+    new: {
+      count: 320,
+      description: "Subscritores que se inscreveram nos últimos 7 dias",
+    },
+  };
+
+  const validateForm = (): boolean => {
     if (!subject.trim()) {
       setError("O assunto é obrigatório");
       return false;
     }
-
     if (!content.trim()) {
       setError("O conteúdo é obrigatório");
       return false;
     }
-
     return true;
   };
 
-  // Função para carregar modelo
   const loadTemplate = (templateId: string) => {
     switch (templateId) {
       case "event":
@@ -129,20 +166,16 @@ export default function NewsletterSender() {
     }
   };
 
-  // Tratar submissão
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSent(false);
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSending(true);
 
     try {
-      // Construir objeto de dados
       const newsletterData = {
         subject,
         content,
@@ -151,7 +184,6 @@ export default function NewsletterSender() {
         scheduledDate: scheduledDate || undefined,
       };
 
-      // Enviar para a API
       const response = await fetch("/api/newsletter-send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -167,11 +199,14 @@ export default function NewsletterSender() {
       setIsSent(true);
       setSentMessage(
         scheduledDate
-          ? `Newsletter agendada com sucesso para ${new Date(scheduledDate).toLocaleString()}!`
-          : `Newsletter enviada com sucesso para ${data.recipients || 0} subscritores!`
+          ? `Newsletter agendada com sucesso para ${new Date(
+              scheduledDate
+            ).toLocaleString()}!`
+          : `Newsletter enviada com sucesso para ${
+              data.recipients || 0
+            } subscritores!`
       );
 
-      // Limpar os campos após envio bem-sucedido
       if (!scheduledDate) {
         setSubject("");
         setContent("");
@@ -189,279 +224,333 @@ export default function NewsletterSender() {
     }
   };
 
-  // Pré-visualização de audiência
-  const audiencePreview = {
-    all: {
-      count: 3450,
-      description: "Todos os subscritores ativos",
-    },
-    engaged: {
-      count: 2150,
-      description:
-        "Subscritores que abriram pelo menos um email nos últimos 30 dias.",
-    },
-    inactive: {
-      count: 1300,
-      description: "Subscritores que não abriram emails nos últimos 30 dias",
-    },
-    new: {
-      count: 320,
-      description: "Subscritores que se inscreveram nos últimos 7 dias",
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { when: "beforeChildren", staggerChildren: 0.1 },
     },
   };
 
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.3 } },
+  };
+
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">Enviar Newsletter</h1>
-      </div>
+    <motion.div
+      className="space-y-6 max-w-screen-2xl mx-auto p-4 sm:p-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      {/* Header */}
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            Enviar Newsletter
+          </h1>
+          <p className="text-gray-400 mt-1">
+            Crie e envie campanhas de email para seus subscritores
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white"
+          onClick={() =>
+            alert("Função de salvar rascunho será implementada em breve.")
+          }
+        >
+          Guardar como rascunho
+        </Button>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <Tabs defaultValue="content" className="w-full">
-          <TabsList className="bg-gray-800 border-gray-700">
-            <TabsTrigger value="content">Conteúdo</TabsTrigger>
-            <TabsTrigger value="audience">Audiência</TabsTrigger>
-            <TabsTrigger value="preview">Pré-visualização</TabsTrigger>
-            <TabsTrigger value="schedule">Agendamento</TabsTrigger>
-          </TabsList>
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <motion.div variants={itemVariants}>
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList className="bg-gray-900/50 border border-gray-800 grid grid-cols-2 sm:grid-cols-4 gap-2 p-2 rounded-lg">
+              <TabsTrigger
+                value="content"
+                className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Conteúdo
+              </TabsTrigger>
+              <TabsTrigger
+                value="audience"
+                className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Audiência
+              </TabsTrigger>
+              <TabsTrigger
+                value="preview"
+                className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Pré-visualização
+              </TabsTrigger>
+              <TabsTrigger
+                value="schedule"
+                className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Agendamento
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="content" className="mt-6">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle>Conteúdo da Newsletter</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Crie o conteúdo da sua newsletter ou escolha um modelo para
-                  começar
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="template">Modelo</Label>
-                  <Select onValueChange={loadTemplate} defaultValue="blank">
-                    <SelectTrigger className="bg-gray-900 border-gray-700">
-                      <SelectValue placeholder="Selecione um modelo" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-900 border-gray-700">
-                      {templates.map((template) => (
-                        <SelectItem key={template.id} value={template.id}>
-                          {template.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Assunto</Label>
-                  <Input
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Assunto do email"
-                    className="bg-gray-900 border-gray-700"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="preview">Texto de pré-visualização</Label>
-                  <Input
-                    id="preview"
-                    value={preview}
-                    onChange={(e) => setPreview(e.target.value)}
-                    placeholder="Texto que aparece na pré-visualização do email (opcional)"
-                    className="bg-gray-900 border-gray-700"
-                  />
-                  <p className="text-xs text-gray-400">
-                    Este texto será mostrado como pré-visualização em clientes
-                    de email
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="content">Conteúdo</Label>
-                  <RichTextEditor
-                    value={content}
-                    onChange={setContent}
-                    className="min-h-[300px] bg-gray-900 border-gray-700"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="audience" className="mt-6">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle>Audiência</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Selecione qual grupo de subscritores receberá esta newsletter
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(audiencePreview).map(([key, data]) => (
-                    <div
-                      key={key}
-                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                        audienceType === key
-                          ? "border-purple-500 bg-purple-900/20"
-                          : "border-gray-700 hover:border-gray-600"
-                      }`}
-                      onClick={() => setAudienceType(key)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium capitalize">
-                          {key === "all"
-                            ? "Todos"
-                            : key === "engaged"
-                              ? "Ativos"
-                              : key === "inactive"
-                                ? "Inativos"
-                                : "Novos"}
-                        </h3>
-                        <div className="flex items-center space-x-1 text-purple-400">
-                          <Users className="h-4 w-4 mr-1" />
-                          <span>{data.count.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-400">
-                        {data.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="preview" className="mt-6">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle>Pré-visualização</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Visualize como a sua newsletter será exibida para os
-                  destinatários
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="border border-gray-700 rounded-lg overflow-hidden">
-                  <div className="bg-gray-900 p-4 border-b border-gray-700">
-                    <div className="flex items-center space-x-2 text-sm">
-                      <span className="text-gray-400">De:</span>
-                      <span>BadCompany &lt;newsletter@badcompany.pt&gt;</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm mt-2">
-                      <span className="text-gray-400">Assunto:</span>
-                      <span className="font-medium">
-                        {subject || "Sem assunto"}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm mt-2">
-                      <span className="text-gray-400">Pré-visualização:</span>
-                      <span className="text-gray-500 italic">
-                        {preview || "Sem texto de pré-visualização"}
-                      </span>
-                    </div>
+            <TabsContent value="content" className="mt-6">
+              <Card className="bg-gray-900/50 border border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-white">
+                    Conteúdo da Newsletter
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Crie o conteúdo da sua newsletter ou escolha um modelo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="template" className="text-gray-300">
+                      Modelo
+                    </Label>
+                    <Select onValueChange={loadTemplate} defaultValue="blank">
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                        <SelectValue placeholder="Selecione um modelo" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-gray-800 text-white">
+                        {templates.map((template) => (
+                          <SelectItem key={template.id} value={template.id}>
+                            {template.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="bg-white p-4 min-h-[400px]">
-                    {content ? (
-                      <div
-                        className="text-black"
-                        dangerouslySetInnerHTML={{ __html: content }}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        Sem conteúdo para exibir. Adicione conteúdo no separador
-                        "Conteúdo".
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex justify-between mt-6">
-                  <Button
-                    variant="outline"
-                    className="border-gray-700"
-                    onClick={() => {
-                      alert(
-                        "Função de envio de teste será implementada em breve."
-                      );
-                    }}
-                  >
-                    Enviar teste para o meu email
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="schedule" className="mt-6">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle>Agendamento</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Defina quando a newsletter será enviada
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="schedule">Data e Hora de Envio</Label>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-gray-400" />
+                  <div className="space-y-2">
+                    <Label htmlFor="subject" className="text-gray-300">
+                      Assunto
+                    </Label>
                     <Input
-                      type="datetime-local"
-                      id="schedule"
-                      value={scheduledDate}
-                      onChange={(e) => setScheduledDate(e.target.value)}
-                      className="bg-gray-900 border-gray-700"
-                      min={new Date().toISOString().slice(0, 16)}
+                      id="subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder="Assunto do email"
+                      className="bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">
-                    Deixe em branco para enviar imediatamente
-                  </p>
-                </div>
 
-                <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 flex items-start">
-                  <AlertCircle className="h-5 w-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-blue-300 font-medium mb-1">
-                      Agendamento de Newsletters
-                    </p>
-                    <p className="text-xs text-blue-200">
-                      As newsletters agendadas serão enviadas automaticamente na
-                      data e hora especificadas. Você pode cancelar ou editar
-                      uma newsletter agendada a qualquer momento através da
-                      lista de campanhas programadas.
+                  <div className="space-y-2">
+                    <Label htmlFor="preview" className="text-gray-300">
+                      Texto de pré-visualização
+                    </Label>
+                    <Input
+                      id="preview"
+                      value={preview}
+                      onChange={(e) => setPreview(e.target.value)}
+                      placeholder="Texto que aparece na pré-visualização (opcional)"
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                    <p className="text-xs text-gray-400">
+                      Mostrado na pré-visualização em clientes de email
                     </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="content" className="text-gray-300">
+                      Conteúdo
+                    </Label>
+                    <RichTextEditor
+                      value={content}
+                      onChange={setContent}
+                      className="min-h-[300px] bg-gray-900 border-gray-800 text-white"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="audience" className="mt-6">
+              <Card className="bg-gray-900/50 border border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-white">Audiência</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Selecione o grupo de subscritores que receberá esta
+                    newsletter
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {Object.entries(audiencePreview).map(([key, data]) => (
+                      <div
+                        key={key}
+                        className={`border rounded-lg p-4 cursor-pointer transition-all hover:border-gray-600 ${
+                          audienceType === key
+                            ? "border-purple-500 bg-purple-900/20"
+                            : "border-gray-700"
+                        }`}
+                        onClick={() => setAudienceType(key)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium text-white capitalize">
+                            {key === "all"
+                              ? "Todos"
+                              : key === "engaged"
+                                ? "Ativos"
+                                : key === "inactive"
+                                  ? "Inativos"
+                                  : "Novos"}
+                          </h3>
+                          <div className="flex items-center text-purple-400">
+                            <Users className="h-4 w-4 mr-1" />
+                            <span>{data.count.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                          {data.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="preview" className="mt-6">
+              <Card className="bg-gray-900/50 border border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-white">Pré-visualização</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Veja como a newsletter será exibida aos destinatários
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="border border-gray-800 rounded-lg overflow-hidden">
+                    <div className="bg-gray-900 p-4 border-b border-gray-800">
+                      <div className="text-sm text-gray-300">
+                        <span className="text-gray-400">De: </span>
+                        BadCompany &lt;newsletter@badcompany.pt&gt;
+                      </div>
+                      <div className="text-sm text-gray-300 mt-2">
+                        <span className="text-gray-400">Assunto: </span>
+                        <span className="font-medium">
+                          {subject || "Sem assunto"}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-300 mt-2">
+                        <span className="text-gray-400">
+                          Pré-visualização:{" "}
+                        </span>
+                        <span className="text-gray-500 italic">
+                          {preview || "Sem texto de pré-visualização"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 min-h-[400px] text-black">
+                      {content ? (
+                        <div dangerouslySetInnerHTML={{ __html: content }} />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          Sem conteúdo para exibir. Adicione no separador
+                          "Conteúdo".
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto"
+                      onClick={() =>
+                        alert(
+                          "Função de envio de teste será implementada em breve."
+                        )
+                      }
+                    >
+                      Enviar teste para o meu email
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="schedule" className="mt-6">
+              <Card className="bg-gray-900/50 border border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-white">Agendamento</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Defina quando a newsletter será enviada
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule" className="text-gray-300">
+                      Data e Hora de Envio
+                    </Label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        type="datetime-local"
+                        id="schedule"
+                        value={scheduledDate}
+                        onChange={(e) => setScheduledDate(e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white pl-10"
+                        min={new Date().toISOString().slice(0, 16)}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Deixe em branco para enviar imediatamente
+                    </p>
+                  </div>
+                  <div className="bg-blue-900/20 border border-blue-800/30 rounded-lg p-4 flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-blue-300 font-medium mb-1">
+                        Agendamento de Newsletters
+                      </p>
+                      <p className="text-xs text-blue-200">
+                        As newsletters agendadas serão enviadas automaticamente
+                        na data e hora especificadas. Você pode cancelar ou
+                        editar uma newsletter agendada a qualquer momento.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+
+        {/* Status Messages */}
         {error && (
-          <div className="bg-red-900/20 border border-red-700 text-red-400 p-4 rounded-lg">
-            {error}
-          </div>
+          <motion.div
+            variants={itemVariants}
+            className="bg-red-900/20 border border-red-800 text-red-400 p-4 rounded-lg flex items-center gap-2"
+          >
+            <AlertCircle className="h-5 w-5" />
+            <span>{error}</span>
+          </motion.div>
         )}
 
         {isSent && (
-          <div className="bg-green-900/20 border border-green-700 text-green-400 p-4 rounded-lg">
-            {sentMessage}
-          </div>
+          <motion.div
+            variants={itemVariants}
+            className="bg-green-900/20 border border-green-800 text-green-400 p-4 rounded-lg flex items-center gap-2"
+          >
+            <Send className="h-5 w-5" />
+            <span>{sentMessage}</span>
+          </motion.div>
         )}
 
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" className="border-gray-700">
-            Guardar como rascunho
-          </Button>
-
+        {/* Submit Buttons */}
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row justify-end gap-4"
+        >
           <Button
             type="submit"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
             disabled={isSending}
           >
             {isSending ? (
@@ -475,8 +564,8 @@ export default function NewsletterSender() {
               </>
             )}
           </Button>
-        </div>
+        </motion.div>
       </form>
-    </div>
+    </motion.div>
   );
 }
