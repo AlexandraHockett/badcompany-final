@@ -1,7 +1,7 @@
 // app/(root)/loja/layout.tsx
 import { ReactNode } from "react";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { BackgroundBeamsWithCollision } from "@/components/layout/background-beams-with-collision";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 type LojaLayoutProps = {
   children: ReactNode;

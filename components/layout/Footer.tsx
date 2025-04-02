@@ -3,7 +3,7 @@ import { FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa";
 import { ReactElement, useEffect, useState } from "react";
 import Button from "./Button";
 import Link from "next/link";
-import Newsletter from "./Newsletter";
+import Newsletter from "../home/Newsletter";
 
 interface SocialLink {
   href: string;

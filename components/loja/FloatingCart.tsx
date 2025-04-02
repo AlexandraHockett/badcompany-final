@@ -6,7 +6,7 @@ import Image from "next/image";
 import { CartItem, BaseProduct } from "@/types/types";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Button from "./Button";
+import Button from "../layout/Button";
 
 interface FloatingCartProps {
   cartItems: CartItem[];

@@ -1,9 +1,9 @@
 "use client";
 
-import MediaCard from "@/components/MediaCard";
+import MediaCard from "@/components/media/MediaCard";
 import { mediaSections } from "@/data/mediaContent";
 import { motion } from "framer-motion";
-import { Sparkles } from "@/components/ui/sparkles";
+import { Sparkles } from "@/components/layout/sparkles";
 
 export default function MediaPage() {
   const container = {
@@ -60,8 +60,6 @@ export default function MediaPage() {
             </motion.div>
           ))}
         </motion.div>
-
-       
       </div>
     </section>
   );

@@ -5,9 +5,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/autenticacao/LogoutButton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 // Define types for orders and user

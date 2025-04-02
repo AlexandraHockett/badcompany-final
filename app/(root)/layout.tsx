@@ -2,7 +2,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+import { BackgroundBeamsWithCollision } from "@/components/layout/background-beams-with-collision";
 
 interface InnerLayoutProps {
   children: ReactNode;

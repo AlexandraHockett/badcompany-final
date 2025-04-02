@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import Button from "@/components/Button";
-import { Sparkles } from "@/components/ui/sparkles";
+import Button from "@/components/layout/Button";
+import { Sparkles } from "@/components/layout/sparkles";
 
 type EventDetailsClientProps = {
   event: {

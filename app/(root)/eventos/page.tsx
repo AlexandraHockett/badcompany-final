@@ -1,10 +1,10 @@
 "use client";
 
-import EventCard from "@/components/EventCard";
-import Button from "@/components/Button";
+import EventCard from "@/components/eventos/EventCard";
+import Button from "@/components/layout/Button";
 import { eventSections } from "@/data/eventos/eventsContent";
 import { motion } from "framer-motion";
-import { Sparkles } from "@/components/ui/sparkles";
+import { Sparkles } from "@/components/layout/sparkles";
 
 export default function EventosPage() {
   const container = {

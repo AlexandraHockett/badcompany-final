@@ -23,7 +23,7 @@ import {
 import { Loader2, Send, Calendar, Users, AlertCircle } from "lucide-react";
 
 // Editor de Rich Text com carregamento dinâmico para evitar erros de SSR
-const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
+const RichTextEditor = dynamic(() => import("@/components/administracao/RichTextEditor"), {
   ssr: false,
   loading: () => <div className="h-64 bg-gray-800 rounded-md animate-pulse" />,
 });

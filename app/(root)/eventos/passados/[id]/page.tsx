@@ -1,4 +1,4 @@
-import EventDetailsClient from "@/components/EventDetailsClient";
+import EventDetailsClient from "@/components/eventos/EventDetailsClient";
 import { events, getEventById } from "@/data/eventos/eventsContent";
 import { notFound } from "next/navigation";
 

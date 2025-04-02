@@ -5,10 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { FaBars, FaTimes } from "react-icons/fa";
-import Playbutton from "./Playbutton";
+import Playbutton from "../home/Playbutton";
 import { useSession } from "next-auth/react";
 import { ShoppingCart, User } from "lucide-react";
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/autenticacao/LogoutButton";
 import { CartItem } from "@/types/types";
 
 // Memoize nav items to prevent unnecessary re-rendering

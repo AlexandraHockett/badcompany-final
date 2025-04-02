@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import ProductCard from "@/components/ProductCard";
-import FloatingCart from "@/components/FloatingCart";
+import ProductCard from "@/components/loja/ProductCard";
+import FloatingCart from "@/components/loja/FloatingCart";
 import { CartItem, BaseProduct } from "@/types/types";
 import {
   products,
@@ -13,8 +13,8 @@ import {
   featuredProducts,
   sortProducts,
 } from "@/data/products";
-import FeaturedProduct from "@/components/FeaturedProduct";
-import Newsletter from "@/components/Newsletter";
+import FeaturedProduct from "@/components/loja/FeaturedProduct";
+import Newsletter from "@/components/home/Newsletter";
 
 export default function LojaPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);

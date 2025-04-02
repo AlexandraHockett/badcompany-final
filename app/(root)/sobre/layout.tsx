@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState, useEffect, CSSProperties } from "react";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 type Props = {
   children: ReactNode;

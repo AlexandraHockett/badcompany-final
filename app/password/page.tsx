@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Cookies from "js-cookie";
-import Loading from "@/components/Loading"; // Ensure this exists
+import Loading from "@/components/layout/Loading"; // Ensure this exists
 
 export default function PasswordPage() {
   return (

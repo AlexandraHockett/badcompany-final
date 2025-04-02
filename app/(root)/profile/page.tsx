@@ -1,7 +1,7 @@
 // app/(root)/profile/page.tsx (server component)
 import { Suspense } from "react";
-import ProfilePage from "@/components/ProfilePage";
-import Loading from "@/components/Loading";
+import ProfilePage from "@/components/autenticacao/ProfilePage";
+import Loading from "@/components/layout/Loading";
 
 export default function ProfileRoute() {
   return (

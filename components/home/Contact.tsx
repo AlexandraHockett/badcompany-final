@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import Button from "./Button";
+import Button from "../layout/Button";
 
 const Contact: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);

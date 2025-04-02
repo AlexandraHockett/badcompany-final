@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, memo } from "react";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import gsap from "gsap";
-import GlitchCursor from "./GlitchCursor";
+import GlitchCursor from "../layout/GlitchCursor";
 
 gsap.registerPlugin(ScrollTrigger);
 

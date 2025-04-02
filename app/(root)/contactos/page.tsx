@@ -9,7 +9,7 @@ import {
   FaPaperPlane,
   FaRegCheckCircle,
 } from "react-icons/fa";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 import { SiInstagram, SiFacebook, SiYoutube } from "react-icons/si";
 
 // Define proper types for form state

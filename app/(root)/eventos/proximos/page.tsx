@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Button from "@/components/Button";
-import Countdown from "@/components/Countdown";
+import Button from "@/components/layout/Button";
+import Countdown from "@/components/eventos/Countdown";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { events } from "@/data/eventos/eventsContent";
-import Newsletter from "@/components/Newsletter";
+import Newsletter from "@/components/home/Newsletter";
 
 // Filtrar apenas eventos próximos
 const upcomingEvents = events.filter((event) => event.status === "upcoming");

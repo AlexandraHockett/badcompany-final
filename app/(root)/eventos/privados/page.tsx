@@ -1,7 +1,7 @@
 "use client";
-import BudgetForm from "@/components/BudgetForm";
+import BudgetForm from "@/components/eventos/BudgetForm";
 import { motion } from "framer-motion";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import {

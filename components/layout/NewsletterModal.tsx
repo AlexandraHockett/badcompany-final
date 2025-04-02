@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import Newsletter from "@/components/Newsletter";
+import Newsletter from "@/components/home/Newsletter";
 
 export default function NewsletterModal() {
   const [isOpen, setIsOpen] = useState(false);

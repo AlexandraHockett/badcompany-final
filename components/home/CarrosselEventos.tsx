@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "./Button";
+import Button from "../layout/Button";
 import Image from "next/image";
 
 // Interface para os eventos

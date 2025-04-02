@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 import { events } from "@/data/eventos/eventsContent";
 
 // Função para obter apenas eventos passados

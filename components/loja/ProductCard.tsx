@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BaseProduct } from "@/types/types";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 
 interface ProductCardProps {
   id: number;

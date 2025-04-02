@@ -2,9 +2,9 @@
 
 import React, { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import NewsletterModal from "@/components/NewsletterModal";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import NewsletterModal from "@/components/layout/NewsletterModal";
 
 export default function LayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();

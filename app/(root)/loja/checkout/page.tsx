@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "@/components/Button";
-import LogoutButton from "@/components/LogoutButton";
+import Button from "@/components/layout/Button";
+import LogoutButton from "@/components/autenticacao/LogoutButton";
 import Image from "next/image";
 
 export default function CheckoutPage() {

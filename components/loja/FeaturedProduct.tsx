@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react"; // Added useCallback import
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 import { BaseProduct } from "@/types/types";
 // Removed unnecessary div import from framer-motion/client
 

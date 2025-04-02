@@ -1,12 +1,12 @@
 //app\layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { helveticaNeue } from "./fonts";
-import NewsletterModal from "@/components/NewsletterModal";
-import Providers from "@/components/Providers";
-import LayoutContent from "./LayoutContent"; // Import the new client component
+import NewsletterModal from "@/components/layout/NewsletterModal";
+import Providers from "@/components/layout/Providers";
+import LayoutContent from "../components/layout/LayoutContent"; // Import the new client component
 
 export const metadata: Metadata = {
   title: "BadCompany | Eventos Inovadores e Memoráveis",

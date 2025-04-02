@@ -3,14 +3,17 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Button from "@/components/Button";
+import Button from "@/components/layout/Button";
 import Image from "next/image";
 import { events, Event, LocationEntry } from "@/data/eventos/eventsContent";
 
 // Dynamically import InteractiveMap with SSR disabled
-const InteractiveMap = dynamic(() => import("@/components/InteractiveMap"), {
-  ssr: false,
-});
+const InteractiveMap = dynamic(
+  () => import("@/components/eventos/InteractiveMap"),
+  {
+    ssr: false,
+  }
+);
 
 // Filtrar apenas eventos internacionais
 const internationalEvents = events.filter((event) => event.international);

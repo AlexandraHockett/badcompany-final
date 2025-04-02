@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import Button from "./Button";
+import Button from "../layout/Button";
 
 interface NewsletterProps {
   title?: string;
