@@ -233,7 +233,7 @@ export default function NewsletterSender() {
       setTestSent(false);
     }, 500);
 
-    /* CÓDIGO REAL PARA PRODUÇÃO:
+    //CÓDIGO REAL PARA PRODUÇÃO:
     fetch("/api/newsletter-draft", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -245,7 +245,7 @@ export default function NewsletterSender() {
         scheduledDate,
       }),
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
           const error = response.statusText || "Erro ao guardar rascunho";
           throw new Error(error);
@@ -257,11 +257,10 @@ export default function NewsletterSender() {
         setIsDraftSaved(true);
         setError(null);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Erro ao guardar rascunho:", err);
         setError(err.message || "Ocorreu um erro ao guardar o rascunho");
       });
-    */
   };
 
   // Função para enviar email de teste - separada do formulário principal
@@ -294,7 +293,7 @@ export default function NewsletterSender() {
       setTestSent(true);
     }, 1500);
 
-    /* CÓDIGO REAL PARA PRODUÇÃO: 
+    //CÓDIGO REAL PARA PRODUÇÃO:
     fetch("/api/newsletter-test", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -305,7 +304,7 @@ export default function NewsletterSender() {
         recipientEmail: session?.user?.email,
       }),
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
           const error = response.statusText || "Erro ao enviar email de teste";
           throw new Error(error);
@@ -316,14 +315,13 @@ export default function NewsletterSender() {
         console.log("Email de teste enviado com sucesso");
         setTestSent(true);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Erro ao enviar teste:", err);
         setError(err.message || "Ocorreu um erro ao enviar o email de teste");
       })
       .finally(() => {
         setIsSendingTest(false);
       });
-    */
   };
 
   // Função para preparar envio (exibe confirmação)

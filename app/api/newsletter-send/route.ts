@@ -1,10 +1,10 @@
+// app/api/newsletter-send/route.ts
+// Alteração do endereço de e-mail remetente
+
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { withRetry } from "@/utils/rentry";
-
-// Função para tentar operações do Prisma com retentativa
-const result = await withRetry(() => prisma.newsletterCampaign.findMany());
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       port: Number(process.env.EMAIL_PORT) || 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env.NEWSLETTER_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
 
         // Configurar o email
         const mailOptions = {
-          from: `"BadCompany" <${process.env.EMAIL_USER}>`,
+          from: `"BadCompany" <newsletter@badcompany.pt>`, // Alterado para o novo e-mail
           to: subscriber.email,
           subject: subject,
           html: personalizedContent,

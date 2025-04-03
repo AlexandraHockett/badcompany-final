@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     // Verificar se o email é o específico para newsletter
-    if (email !== "geral@badcompany.pt") {
+    if (email !== "newsletter@badcompany.pt") {
       return NextResponse.json(
         { error: "Acesso não autorizado" },
         { status: 403 }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     // Buscar usuário
     const user = await prisma.user.findUnique({
-      where: { email: "geral@badcompany.pt" },
+      where: { email: "newsletter@badcompany.pt" },
     });
 
     // Verificar usuário

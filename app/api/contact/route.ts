@@ -18,14 +18,14 @@ export async function POST(req: Request) {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env.BOOKINGS_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: "geral@badcompany.pt",
+      from: process.env.BOOKINGS_USER,
+      to: "bookings@badcompany.pt",
       subject: `Nova mensagem de ${nome}`,
       text: `Nome: ${nome}\nEmail: ${email}\nMensagem: ${mensagem}`,
       html: `

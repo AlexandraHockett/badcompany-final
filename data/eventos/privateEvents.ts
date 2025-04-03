@@ -190,7 +190,7 @@ export const privateEventsInfo = {
     },
   ],
   contactInfo: {
-    email: "geral@badcompany.pt",
+    email: "bookings@badcompany.pt",
     phone: "+351 926 036 987",
     whatsapp: "https://wa.me/351926036987",
   },

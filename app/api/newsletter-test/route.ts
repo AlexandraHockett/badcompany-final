@@ -1,4 +1,5 @@
 // app/api/newsletter-test/route.ts
+// Modificar a configuração do e-mail e otimizar o envio
 
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       port: Number(process.env.EMAIL_PORT) || 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env.NEWSLETTER_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
@@ -64,15 +65,16 @@ export async function POST(request: Request) {
 
     // Configurar o email
     const mailOptions = {
-      from: `"BadCompany (TESTE)" <${process.env.EMAIL_USER}>`,
+      from: `"BadCompany (TESTE)" <newsletter@badcompany.pt>`, // Alterado para o novo e-mail
       to: recipientEmail,
       subject: `[TESTE] ${subject}`,
       html: personalizedContent,
       text: preview || subject,
     };
 
-    // Enviar o email
-    await withRetry(() => transporter.sendMail(mailOptions));
+    // Enviar o email - Usado diretamente sem withRetry para melhorar o tempo de resposta
+    // já que é apenas um e-mail, não precisamos da complexidade de retentativas
+    const result = await transporter.sendMail(mailOptions);
 
     return NextResponse.json({
       success: true,

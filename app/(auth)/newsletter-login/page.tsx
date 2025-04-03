@@ -9,7 +9,7 @@ import { signIn } from "next-auth/react";
 export default function NewsletterLoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("geral@badcompany.pt");
+  const [email, setEmail] = useState("newsletter@badcompany.pt");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,7 @@ export default function NewsletterLoginPage() {
 
       const result = await signIn("credentials", {
         redirect: false,
-        email: "geral@badcompany.pt",
+        email: "newsletter@badcompany.pt",
         password,
         isNewsletterOnly: "true",
       });
