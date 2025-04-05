@@ -355,85 +355,66 @@ export default function NewsletterSender() {
     setIsDraftSaved(false);
     setShowConfirmModal(false);
 
-    // Na API real, a substituição de {{name}} pelo nome real de cada subscritor
-    // deve ser feita no servidor no momento do envio para cada destinatário individual
+    // Use async/await em vez de promises encadeadas
+    const sendNewsletter = async () => {
+      try {
+        const response = await fetch("/api/newsletter-send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject,
+            content,
+            preview,
+            audienceType,
+            scheduledDate: scheduledDate || undefined,
+          }),
+          // Aumente o timeout para operações longas
+          signal: AbortSignal.timeout(5 * 60 * 1000), // 5 minutos
+        });
 
-    // SIMULAÇÃO: Apenas para fins de demonstração
-    // Em ambiente de produção, descomentar o código fetch abaixo
-    setTimeout(() => {
-      console.log("Newsletter enviada com sucesso");
-      setIsSending(false);
-      setIsSent(true);
-
-      // Usar o número correto de destinatários
-      const recipientCount = audiencePreview[audienceType]?.count || 0;
-
-      setSentMessage(
-        scheduledDate
-          ? `Newsletter agendada com sucesso para ${new Date(
-              scheduledDate
-            ).toLocaleString("pt-PT")}!`
-          : `Newsletter enviada com sucesso para ${recipientCount} subscritores!`
-      );
-
-      if (!scheduledDate) {
-        // Limpar o formulário apenas depois de um envio real (não agendado)
-        setSubject("");
-        setContent("");
-        setPreview("");
-        setAudienceType("all");
-        setScheduledDate("");
-      }
-    }, 2000);
-
-    /* CÓDIGO REAL PARA PRODUÇÃO:
-    fetch("/api/newsletter-send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        subject,
-        content,  // Enviar com os placeholders {{name}} para o servidor substituir
-        preview,
-        audienceType,
-        scheduledDate: scheduledDate || undefined,
-      }),
-    })
-      .then(response => {
         if (!response.ok) {
-          const error = response.statusText || "Erro ao enviar newsletter";
-          throw new Error(error);
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Erro ao enviar newsletter");
         }
-        return response.json();
-      })
-      .then(data => {
+
+        const data = await response.json();
         console.log("Newsletter enviada com sucesso:", data);
+
+        // Atualizar estado de sucesso
         setIsSent(true);
-        
-        const recipientCount = data.totalRecipients || audiencePreview[audienceType]?.count || 0;
-        
+        const recipientCount =
+          data.totalRecipients || audiencePreview[audienceType]?.count || 0;
+
         setSentMessage(
           scheduledDate
-            ? `Newsletter agendada com sucesso para ${new Date(scheduledDate).toLocaleString('pt-PT')}!`
+            ? `Newsletter agendada com sucesso para ${new Date(scheduledDate).toLocaleString("pt-PT")}!`
             : `Newsletter enviada com sucesso para ${recipientCount} subscritores!`
         );
 
+        // Limpar formulário se não for agendado
         if (!scheduledDate) {
-          // Limpar o formulário após envio
           setSubject("");
           setContent("");
           setPreview("");
           setAudienceType("all");
           setScheduledDate("");
         }
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Erro ao enviar newsletter:", err);
-        setError(err.message || "Ocorreu um erro ao enviar a newsletter");
-      })
-      .finally(() => {
+
+        // Mensagem de erro mais detalhada
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Ocorreu um erro ao enviar a newsletter"
+        );
+      } finally {
         setIsSending(false);
-      });
-    */
+      }
+    };
+
+    // Chamar a função de envio
+    sendNewsletter();
   };
 
   const handleContentChange = (value: string) => {

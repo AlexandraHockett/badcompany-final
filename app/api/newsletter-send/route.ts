@@ -1,40 +1,49 @@
-// app/api/newsletter-send/route.ts
-// Alteração do endereço de e-mail remetente
-
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { withRetry } from "@/utils/rentry";
 
 export async function POST(request: Request) {
+  console.log(
+    "Início do processamento da newsletter - Timestamp:",
+    new Date().toISOString()
+  );
+
   try {
     const { subject, content, preview, audienceType } = await request.json();
 
-    // Validar dados
     if (!subject || !content) {
+      console.warn("Validação de dados falhou: Assunto ou conteúdo ausente");
       return NextResponse.json(
         { error: "Assunto e conteúdo são obrigatórios" },
         { status: 400 }
       );
     }
 
-    // Configurar o transporter do Nodemailer
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
+      host: process.env.EMAIL_HOST || "smtp.hostinger.com",
       port: Number(process.env.EMAIL_PORT) || 587,
       secure: false,
       auth: {
-        user: process.env.NEWSLETTER_USER,
+        user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
+      },
+      debug: true,
+      logger: true,
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
-    // Determinar a audiência com base no tipo selecionado
+    console.log("Configuração de audiência:", {
+      type: audienceType,
+      timestamp: new Date().toISOString(),
+    });
+
     let subscribersWhere = {};
 
     switch (audienceType) {
       case "engaged":
-        // Assinantes que abriram um email nos últimos 30 dias
         subscribersWhere = {
           active: true,
           campaigns: {
@@ -47,7 +56,6 @@ export async function POST(request: Request) {
         };
         break;
       case "inactive":
-        // Assinantes que não abriram emails nos últimos 30 dias
         subscribersWhere = {
           active: true,
           campaigns: {
@@ -60,7 +68,6 @@ export async function POST(request: Request) {
         };
         break;
       case "new":
-        // Assinantes que se inscreveram nos últimos 7 dias
         subscribersWhere = {
           active: true,
           createdAt: {
@@ -69,13 +76,11 @@ export async function POST(request: Request) {
         };
         break;
       default:
-        // Todos os assinantes ativos
         subscribersWhere = {
           active: true,
         };
     }
 
-    // Buscar os assinantes
     const subscribers = await withRetry(() =>
       prisma.newsletterSubscriber.findMany({
         where: subscribersWhere,
@@ -87,7 +92,18 @@ export async function POST(request: Request) {
       })
     );
 
-    // Criar a campanha
+    console.log(
+      `Encontrados ${subscribers.length} assinantes - Timestamp: ${new Date().toISOString()}`
+    );
+
+    if (subscribers.length === 0) {
+      console.warn("Nenhum assinante encontrado para a campanha");
+      return NextResponse.json(
+        { error: "Nenhum assinante encontrado para esta campanha" },
+        { status: 400 }
+      );
+    }
+
     const campaign = await withRetry(() =>
       prisma.newsletterCampaign.create({
         data: {
@@ -105,10 +121,12 @@ export async function POST(request: Request) {
       })
     );
 
-    // Gerar um pixel de rastreamento único para esta campanha
+    console.log(
+      `Campanha criada - ID: ${campaign.id}, Timestamp: ${new Date().toISOString()}`
+    );
+
     const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/newsletter-track-open?cid=${campaign.id}&sid={{subscriberId}}" width="1" height="1" alt="" style="display:none;" />`;
 
-    // Função para substituir links com links de rastreamento
     const addTrackingToLinks = (htmlContent: string, subscriberId: number) => {
       return htmlContent.replace(
         /<a\s+(?:[^>]*?\s+)?href="([^"]*)"([^>]*)>/gi,
@@ -119,17 +137,13 @@ export async function POST(request: Request) {
       );
     };
 
-    // Contador de emails enviados com sucesso
     let successCount = 0;
     let errorCount = 0;
 
-    // Loop através dos assinantes e enviar o email
     for (const subscriber of subscribers) {
       try {
-        // Personalizar o conteúdo para o assinante
         let personalizedContent = content;
 
-        // Adicionar personalização básica (nome, etc)
         if (subscriber.name) {
           personalizedContent = personalizedContent.replace(
             /{{name}}/g,
@@ -142,18 +156,15 @@ export async function POST(request: Request) {
           );
         }
 
-        // Adicionar pixel de rastreamento ao final do conteúdo
         personalizedContent =
           personalizedContent +
           trackingPixel.replace("{{subscriberId}}", subscriber.id.toString());
 
-        // Adicionar rastreamento de cliques aos links
         personalizedContent = addTrackingToLinks(
           personalizedContent,
           subscriber.id
         );
 
-        // Link de cancelamento de inscrição
         const unsubscribeUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/newsletter-unsubscribe?sid=${subscriber.id}&cid=${campaign.id}`;
         const unsubscribeLink = `<p style="text-align: center; font-size: 12px; color: #999; margin-top: 20px;">
           Não desejas mais receber as nossas newsletters? <a href="${unsubscribeUrl}" style="color: #999;">Cancelar inscrição</a>
@@ -161,23 +172,24 @@ export async function POST(request: Request) {
 
         personalizedContent = personalizedContent + unsubscribeLink;
 
-        // Configurar o email
         const mailOptions = {
-          from: `"BadCompany" <newsletter@badcompany.pt>`, // Alterado para o novo e-mail
+          from: `"BadCompany" <newsletter@badcompany.pt>`,
           to: subscriber.email,
           subject: subject,
           html: personalizedContent,
-          text: preview || subject, // Versão de texto para clientes que não suportam HTML
+          text: preview || subject,
           headers: {
             "X-Campaign-ID": campaign.id.toString(),
             "List-Unsubscribe": `<${unsubscribeUrl}>`,
           },
         };
 
-        // Enviar o email
+        console.log(
+          `Enviando email para ${subscriber.email} - Timestamp: ${new Date().toISOString()}`
+        );
+
         await transporter.sendMail(mailOptions);
 
-        // Registrar o envio para este assinante
         await withRetry(() =>
           prisma.newsletterCampaignRecipient.create({
             data: {
@@ -192,11 +204,9 @@ export async function POST(request: Request) {
       } catch (err) {
         console.error(`Erro ao enviar email para ${subscriber.email}:`, err);
         errorCount++;
-        // Continuar com os próximos envios mesmo se este falhar
       }
     }
 
-    // Atualizar o status da campanha
     await withRetry(() =>
       prisma.newsletterCampaign.update({
         where: {
@@ -209,15 +219,44 @@ export async function POST(request: Request) {
       })
     );
 
+    console.log(
+      `Processamento da newsletter concluído - Sucesso: ${successCount}, Falhas: ${errorCount}, Timestamp: ${new Date().toISOString()}`
+    );
+
     return NextResponse.json({
       success: true,
       message: `Newsletter enviada com sucesso para ${successCount} assinantes. Falhas: ${errorCount}.`,
       campaignId: campaign.id,
+      totalRecipients: subscribers.length,
     });
-  } catch (error) {
-    console.error("Erro ao enviar newsletter:", error);
+  } catch (error: unknown) {
+    let errorMessage = "Erro interno do servidor";
+    let errorDetails: string; // Ensure errorDetails is always a string
+
+    // Type guard to check if error is an instance of Error
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = JSON.stringify({
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        timestamp: new Date().toISOString(),
+      }); // Convert object to string
+    } else if (typeof error === "string") {
+      errorMessage = error;
+      errorDetails = error; // error is already a string
+    } else {
+      errorMessage = "Erro desconhecido";
+      errorDetails = "Ocorreu um erro desconhecido"; // Default string
+    }
+
+    console.error("Erro completo ao enviar newsletter:", errorDetails);
+
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      {
+        error: errorMessage,
+        details: errorDetails, // Now consistently a string
+      },
       { status: 500 }
     );
   }

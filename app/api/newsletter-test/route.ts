@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       port: Number(process.env.EMAIL_PORT) || 587,
       secure: false,
       auth: {
-        user: process.env.NEWSLETTER_USER,
+        user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });

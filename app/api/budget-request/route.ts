@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       port: Number(process.env.EMAIL_PORT) || 587,
       secure: false, // true para 465, false para outras portas
       auth: {
-        user: process.env.BOOKINGS_USER,
+        user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
